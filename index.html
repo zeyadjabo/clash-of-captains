@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MILF LEAGUE // GROK PROTOCOL</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@400;600;700&display=swap');
+
+    :root {
+      --neon-gold: #ffd700;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff00c8;
+      --dark-bg: #05080f;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: var(--dark-bg);
+      color: #e0f0ff;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before, body::after {
+      content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+    }
+    body::before {
+      background: radial-gradient(circle at 30% 20%, rgba(255,215,0,0.12), transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(255,0,200,0.12), transparent 50%);
+      animation: bgPulse 25s infinite alternate;
+    }
+    @keyframes bgPulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+    body::after {
+      background: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 60s linear infinite;
+      z-index: -1;
+    }
+    @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 120px 120px; } }
+
+    h1 {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.8rem, 9vw, 5.2rem);
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(90deg, #ffd700, #ff00c8, #00f5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 20px 0 8px;
+      text-shadow: 0 0 40px rgba(255,215,0,0.8);
+    }
+
+    .subtitle { text-align:center; color:#ff00c8; font-size:1.2rem; letter-spacing:6px; margin-bottom:15px; }
+
+    .gw-highlight {
+      text-align:center; font-size: clamp(2rem, 7vw, 3.5rem); font-weight:900;
+      background:rgba(5,8,15,0.95); border:4px solid var(--neon-gold); color:var(--neon-gold);
+      padding:20px; border-radius:20px; margin:15px auto; max-width:720px;
+      box-shadow:0 0 70px rgba(255,215,0,0.8);
+    }
+
+    /* LEAGUE TABLE - Centered & Improved */
+    .league-table {
+      max-width: 1100px;
+      margin: 30px auto;
+      background: rgba(15,22,45,0.95);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 3px solid var(--neon-gold);
+      box-shadow: 0 0 60px rgba(255,215,0,0.5);
+    }
+    .league-table table { 
+      width:100%; 
+      border-collapse:collapse; 
+    }
+    .league-table th {
+      background: rgba(255,215,0,0.2);
+      color: var(--neon-gold);
+      padding: 16px 12px;
+      font-size: 1.1rem;
+    }
+    .league-table td {
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .league-table tr.yours {
+      background: rgba(255,215,0,0.15) !important;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width:1400px;
+      margin:40px auto;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(420px,1fr));
+      gap:28px;
+      padding:0 15px;
+    }
+
+    .card {
+      background:linear-gradient(145deg, rgba(15,22,45,0.96), rgba(8,12,28,0.98));
+      border-radius:24px;
+      padding:26px;
+      border:2px solid rgba(255,215,0,0.3);
+    }
+    .card.yours { border-color:var(--neon-gold); box-shadow:0 0 60px rgba(255,215,0,0.6); }
+
+    .transfer-list {
+      list-style: none;
+      padding: 0;
+    }
+    .transfer-list li {
+      background: rgba(0,0,0,0.45);
+      padding: 14px 16px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border-left: 5px solid #ff2d55;
+    }
+    .transfer-list small { color: #888; font-size: 0.9rem; }
+
+    .refresh-btn {
+      display:block; margin:35px auto; padding:18px 55px; font-size:1.25rem; font-weight:900;
+      background:linear-gradient(45deg,#ffd700,#ffea00); color:#05080f; border:none;
+      border-radius:50px; cursor:pointer; box-shadow:0 0 50px rgba(255,215,0,0.8);
+    }
+    .refresh-btn:hover { transform:scale(1.08); }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns:1fr; }
+      .league-table th, .league-table td { padding: 12px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>MILF PROTOCOL</h1>
+  <div class="subtitle">Abu Alzooz, The #1 in Clash of Captains // MI-to-CAL TRANSMISSION</div>
+  <div class="gw-highlight">GAMEWEEK 33</div>
+  <div class="update-time">Last scanned: 2026-04-18 21:58 EST EST</div>
+
+  <div class="league-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Pos</th>
+          <th>Team</th>
+          <th>Manager</th>
+          <th>Total</th>
+          <th>GW Points</th>
+          <th>Live Rank</th>
+          <th>Chip</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="yours">
+          <td><strong>#1</strong></td>
+          <td>🔥🥇 Sesko n Destroy</td>
+          <td>Zee</td>
+          <td><strong>1834</strong></td>
+          <td>31</td>
+          <td>#911,641</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td><strong>#2</strong></td>
+          <td>🇪🇬👑🥈 Fergie Time United</td>
+          <td>Sam</td>
+          <td><strong>1829</strong></td>
+          <td>63</td>
+          <td>#981,033</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td><strong>#3</strong></td>
+          <td>🏳️‍🌈 BAKHAAT</td>
+          <td>Joey</td>
+          <td><strong>1503</strong></td>
+          <td>14</td>
+          <td>#7,968,942</td>
+          <td>None</td>
+        </tr></tbody>
+    </table>
+  </div>
+
+  <button class="refresh-btn" onclick="location.reload()">
+    <i class="fas fa-satellite-dish"></i> TRANSMIT FRESH INTEL
+  </button>
+
+  <div class="container">
+<div class="card yours">
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">Sesko n Destroy <small style="color:#888;">(Zee)</small></h2>
+  
+  <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
+  <p style="color:#888;">No transfers this GW</p>
+</div>
+
+
+<div class="card ">
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">Fergie Time United <small style="color:#888;">(Sam)</small></h2>
+  
+  <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
+  <ul class="transfer-list"><li><span class='transfer-out'>Gabriel</span> ↔ <span class='transfer-in'>N.Williams</span><br><small>£0.0 → £0.0 • 2026-04-17 16:13</small></li></ul>
+</div>
+
+
+<div class="card ">
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">BAKHAAT <small style="color:#888;">(Joey)</small></h2>
+  
+  <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
+  <ul class="transfer-list"><li><span class='transfer-out'>Welbeck</span> ↔ <span class='transfer-in'>Thiago</span><br><small>£0.0 → £0.0 • 2026-04-17 16:36</small></li><li><span class='transfer-out'>Cunha</span> ↔ <span class='transfer-in'>Gomez</span><br><small>£0.0 → £0.0 • 2026-04-17 16:36</small></li><li><span class='transfer-out'>Thiago</span> ↔ <span class='transfer-in'>Welbeck</span><br><small>£0.0 → £0.0 • 2026-04-17 16:34</small></li><li><span class='transfer-out'>Guéhi</span> ↔ <span class='transfer-in'>N.Williams</span><br><small>£0.0 → £0.0 • 2026-04-17 02:30</small></li><li><span class='transfer-out'>Verbruggen</span> ↔ <span class='transfer-in'>Donnarumma</span><br><small>£0.0 → £0.0 • 2026-04-17 02:30</small></li><li><span class='transfer-out'>Mitoma</span> ↔ <span class='transfer-in'>Wieffer</span><br><small>£0.0 → £0.0 • 2026-04-17 02:30</small></li><li><span class='transfer-out'>B.Fernandes</span> ↔ <span class='transfer-in'>Cunha</span><br><small>£0.0 → £0.0 • 2026-04-17 01:05</small></li><li><span class='transfer-out'>Reinildo</span> ↔ <span class='transfer-in'>R.Williams</span><br><small>£0.0 → £0.0 • 2026-04-17 01:05</small></li><li><span class='transfer-out'>Caicedo</span> ↔ <span class='transfer-in'>Dowman</span><br><small>£0.0 → £0.0 • 2026-04-17 01:05</small></li><li><span class='transfer-out'>N.Williams</span> ↔ <span class='transfer-in'>Heaven</span><br><small>£0.0 → £0.0 • 2026-04-17 01:05</small></li><li><span class='transfer-out'>Hudson-Odoi</span> ↔ <span class='transfer-in'>Palmer</span><br><small>£0.0 → £0.0 • 2026-04-17 01:05</small></li><li><span class='transfer-out'>Schade</span> ↔ <span class='transfer-in'>Hudson-Odoi</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Cash</span> ↔ <span class='transfer-in'>N.Williams</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Cunha</span> ↔ <span class='transfer-in'>Caicedo</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Anderson</span> ↔ <span class='transfer-in'>Semenyo</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Van de Ven</span> ↔ <span class='transfer-in'>Reinildo</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Areola</span> ↔ <span class='transfer-in'>Heaton</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Dúbravka</span> ↔ <span class='transfer-in'>Verbruggen</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Mac Allister</span> ↔ <span class='transfer-in'>Mitoma</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Virgil</span> ↔ <span class='transfer-in'>Van Hecke</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>J.Timber</span> ↔ <span class='transfer-in'>Guéhi</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>James</span> ↔ <span class='transfer-in'>Cucurella</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Gyökeres</span> ↔ <span class='transfer-in'>João Pedro</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li><li><span class='transfer-out'>Ekitiké</span> ↔ <span class='transfer-in'>Haaland</span><br><small>£0.0 → £0.0 • 2026-04-17 01:01</small></li></ul>
+</div>
+</div>
+</body>
+</html>
