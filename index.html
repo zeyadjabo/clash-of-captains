@@ -60,7 +60,6 @@
       text-align:center; font-size: clamp(1.9rem, 6vw, 3rem); font-weight:900;
       background:rgba(5,8,15,0.95); border:4px solid var(--neon-gold); color:var(--neon-gold);
       padding:18px; border-radius:20px; margin:15px auto; max-width:720px;
-      box-shadow:0 0 60px rgba(255,215,0,0.6);
     }
 
     .league-table {
@@ -90,6 +89,33 @@
       font-weight: bold;
     }
 
+    .insight-box {
+      max-width: 1100px;
+      margin: 40px auto;
+      background: rgba(15,22,45,0.96);
+      border-radius: 20px;
+      padding: 25px;
+      border: 3px solid var(--neon-gold);
+      box-shadow: 0 0 60px rgba(255,215,0,0.4);
+    }
+    .insight-box h2 {
+      color: var(--neon-gold);
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+    }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .insight-item {
+      background: rgba(0,0,0,0.3);
+      padding: 14px;
+      border-radius: 12px;
+    }
+    .insight-item strong { color: #ffd700; }
+
     .container {
       max-width:1400px;
       margin:40px auto;
@@ -105,7 +131,7 @@
       padding:26px;
       border:2px solid rgba(255,215,0,0.3);
     }
-    .card.yours { border-color:var(--neon-gold); box-shadow:0 0 60px rgba(255,215,0,0.5); }
+    .card.yours { border-color:var(--neon-gold); }
 
     .transfer-list {
       list-style: none;
@@ -129,6 +155,7 @@
 
     @media (max-width: 768px) {
       .container { grid-template-columns:1fr; }
+      .insight-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -136,7 +163,7 @@
   <h1>CLASH OF CAPTAINS</h1>
   <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
   <div class="gw-highlight">GAMEWEEK 33</div>
-  <div class="update-time">Last scanned: 2026-04-20 21:24 EST EST</div>
+  <div class="update-time">Last scanned: 2026-04-20 21:33 EST EST</div>
 
   <div class="league-table">
     <table>
@@ -180,6 +207,37 @@
           <td>None</td>
         </tr></tbody>
     </table>
+  </div>
+
+  <!-- GW34 INSIGHT -->
+  <div class="insight-box">
+    <h2>🔥 GW34 INSIGHT (Blank Gameweek)</h2>
+    <div class="insight-grid">
+      <div class="insight-item">
+        <strong>Best Captain Options:</strong><br>
+        1. Bruno Fernandes (MUN)<br>
+        2. Alexander Isak (NEW)<br>
+        3. Mohamed Salah (LIV)
+      </div>
+      <div class="insight-item">
+        <strong>Recommended Buys:</strong><br>
+        1. Bruno Fernandes<br>
+        2. Alexander Isak<br>
+        3. Matheus Cunha
+      </div>
+      <div class="insight-item">
+        <strong>Recommended Sells:</strong><br>
+        1. Arsenal assets (many blank)<br>
+        2. Chelsea assets (blank)<br>
+        3. Man City assets (blank)
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:20px; font-style:italic; color:#aaa;">
+      This is a **Blank Gameweek** for several big teams (MCI, CHE, BHA, etc.). Only ~14 teams play. Free Hit is very popular this week.
+    </p>
+    <p style="text-align:center; margin-top:25px; font-size:1.1rem; color:#ff2d55; font-weight:bold;">
+      The best advice would be to do the opposite of what the great Joey Yakeera suggests.
+    </p>
   </div>
 
   <button class="refresh-btn" onclick="location.reload()">
