@@ -336,7 +336,7 @@ def generate_html(gw, players):
         emojis = {
             "Sesko n Destroy": "🔥🥇",
             "Fergie Time United": "🇪🇬👑🥈",
-            "BAKHAAT": "🏳️‍🌈"
+            "BAKHAAT": "💩"
         }
         
         team_emoji = emojis.get(info['team'], "⚽")
