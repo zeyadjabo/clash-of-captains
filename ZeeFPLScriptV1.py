@@ -68,7 +68,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MILF LEAGUE // GROK PROTOCOL</title>
+  <title>Clash of Captains - FPL Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@400;600;700&display=swap');
@@ -76,7 +76,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     :root {{
       --neon-gold: #ffd700;
       --neon-cyan: #00f5ff;
-      --neon-pink: #ff00c8;
       --dark-bg: #05080f;
     }}
 
@@ -93,8 +92,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
     }}
     body::before {{
-      background: radial-gradient(circle at 30% 20%, rgba(255,215,0,0.12), transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(255,0,200,0.12), transparent 50%);
+      background: radial-gradient(circle at 30% 20%, rgba(255,215,0,0.10), transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(0,245,255,0.10), transparent 50%);
       animation: bgPulse 25s infinite alternate;
     }}
     @keyframes bgPulse {{ 0% {{ opacity: 0.6; }} 100% {{ opacity: 1; }} }}
@@ -111,54 +110,76 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     h1 {{
       text-align: center;
       font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.8rem, 9vw, 5.2rem);
+      font-size: clamp(2.6rem, 8vw, 4.8rem);
       font-weight: 900;
-      letter-spacing: 8px;
-      background: linear-gradient(90deg, #ffd700, #ff00c8, #00f5ff);
+      letter-spacing: 6px;
+      background: linear-gradient(90deg, #ffd700, #00f5ff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin: 20px 0 8px;
-      text-shadow: 0 0 40px rgba(255,215,0,0.8);
+      margin: 25px 0 8px;
     }}
 
-    .subtitle {{ text-align:center; color:#ff00c8; font-size:1.2rem; letter-spacing:6px; margin-bottom:15px; }}
+    .subtitle {{ text-align:center; color:#00f5ff; font-size:1.15rem; letter-spacing:4px; margin-bottom:15px; }}
 
     .gw-highlight {{
-      text-align:center; font-size: clamp(2rem, 7vw, 3.5rem); font-weight:900;
+      text-align:center; font-size: clamp(1.9rem, 6vw, 3rem); font-weight:900;
       background:rgba(5,8,15,0.95); border:4px solid var(--neon-gold); color:var(--neon-gold);
-      padding:20px; border-radius:20px; margin:15px auto; max-width:720px;
-      box-shadow:0 0 70px rgba(255,215,0,0.8);
+      padding:18px; border-radius:20px; margin:15px auto; max-width:720px;
     }}
 
-    /* LEAGUE TABLE - Centered & Improved */
     .league-table {{
       max-width: 1100px;
-      margin: 30px auto;
-      background: rgba(15,22,45,0.95);
+      margin: 35px auto;
+      background: rgba(15,22,45,0.96);
       border-radius: 20px;
       overflow: hidden;
-      border: 3px solid var(--neon-gold);
-      box-shadow: 0 0 60px rgba(255,215,0,0.5);
+      border: 4px solid var(--neon-gold);
+      box-shadow: 0 0 70px rgba(255,215,0,0.5);
     }}
-    .league-table table {{ 
-      width:100%; 
-      border-collapse:collapse; 
-    }}
+    .league-table table {{ width:100%; border-collapse:collapse; }}
     .league-table th {{
-      background: rgba(255,215,0,0.2);
+      background: rgba(255,215,0,0.25);
       color: var(--neon-gold);
-      padding: 16px 12px;
+      padding: 18px 12px;
       font-size: 1.1rem;
+      font-weight: 700;
     }}
     .league-table td {{
       padding: 16px 12px;
       text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }}
     .league-table tr.yours {{
-      background: rgba(255,215,0,0.15) !important;
+      background: rgba(255,215,0,0.18) !important;
       font-weight: bold;
     }}
+
+    .insight-box {{
+      max-width: 1100px;
+      margin: 40px auto;
+      background: rgba(15,22,45,0.96);
+      border-radius: 20px;
+      padding: 25px;
+      border: 3px solid var(--neon-gold);
+      box-shadow: 0 0 60px rgba(255,215,0,0.4);
+    }}
+    .insight-box h2 {{
+      color: var(--neon-gold);
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+    }}
+    .insight-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }}
+    .insight-item {{
+      background: rgba(0,0,0,0.3);
+      padding: 14px;
+      border-radius: 12px;
+    }}
+    .insight-item strong {{ color: #ffd700; }}
 
     .container {{
       max-width:1400px;
@@ -175,7 +196,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       padding:26px;
       border:2px solid rgba(255,215,0,0.3);
     }}
-    .card.yours {{ border-color:var(--neon-gold); box-shadow:0 0 60px rgba(255,215,0,0.6); }}
+    .card.yours {{ border-color:var(--neon-gold); }}
 
     .transfer-list {{
       list-style: none;
@@ -191,21 +212,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .transfer-list small {{ color: #888; font-size: 0.9rem; }}
 
     .refresh-btn {{
-      display:block; margin:35px auto; padding:18px 55px; font-size:1.25rem; font-weight:900;
+      display:block; margin:40px auto; padding:18px 55px; font-size:1.25rem; font-weight:900;
       background:linear-gradient(45deg,#ffd700,#ffea00); color:#05080f; border:none;
-      border-radius:50px; cursor:pointer; box-shadow:0 0 50px rgba(255,215,0,0.8);
+      border-radius:50px; cursor:pointer;
     }}
     .refresh-btn:hover {{ transform:scale(1.08); }}
 
     @media (max-width: 768px) {{
       .container {{ grid-template-columns:1fr; }}
-      .league-table th, .league-table td {{ padding: 12px 8px; }}
+      .insight-grid {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
 <body>
-  <h1>MILF PROTOCOL</h1>
-  <div class="subtitle">Abu Alzooz, The #1 in Clash of Captains // MI-to-CAL TRANSMISSION</div>
+  <h1>CLASH OF CAPTAINS</h1>
+  <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
   <div class="gw-highlight">GAMEWEEK {gw}</div>
   <div class="update-time">Last scanned: {timestamp} EST</div>
 
@@ -226,8 +247,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </table>
   </div>
 
+  <!-- GW34 INSIGHT -->
+  <div class="insight-box">
+    <h2>🔥 GW34 INSIGHT (Blank Gameweek)</h2>
+    <div class="insight-grid">
+      <div class="insight-item">
+        <strong>Best Captain Options:</strong><br>
+        1. Bruno Fernandes (MUN)<br>
+        2. Alexander Isak (NEW)<br>
+        3. Mohamed Salah (LIV)
+      </div>
+      <div class="insight-item">
+        <strong>Recommended Buys:</strong><br>
+        1. Bruno Fernandes<br>
+        2. Alexander Isak<br>
+        3. Matheus Cunha
+      </div>
+      <div class="insight-item">
+        <strong>Recommended Sells:</strong><br>
+        1. Arsenal assets (many blank)<br>
+        2. Chelsea assets (blank)<br>
+        3. Man City assets (blank)
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:20px; font-style:italic; color:#aaa;">
+      This is a **Blank Gameweek** for several big teams (MCI, CHE, BHA, etc.). Only ~14 teams play. Free Hit is very popular this week.
+    </p>
+    <p style="text-align:center; margin-top:25px; font-size:1.1rem; color:#ff2d55; font-weight:bold;">
+      The best advice would be to do the opposite of what the great Joey Yakeera suggests.
+    </p>
+  </div>
+
   <button class="refresh-btn" onclick="location.reload()">
-    <i class="fas fa-satellite-dish"></i> TRANSMIT FRESH INTEL
+    <i class="fas fa-sync"></i> REFRESH DASHBOARD
   </button>
 
   <div class="container">{cards}</div>
@@ -247,7 +299,8 @@ CARD_TEMPLATE = """
 def generate_html(gw, players):
     cards = []
     standings = []
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M EST")
+    # Removed " EST" here because it's already in the HTML_TEMPLATE
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M") 
     
     for mid, info in MANAGERS.items():
         total_points, live_rank = get_manager_summary(mid)
@@ -288,7 +341,18 @@ def generate_html(gw, players):
         
         team_emoji = emojis.get(info['team'], "⚽")
         
-        # ... inside the standings list:
+        # --- FIXED CHIP LOGIC START ---
+        display_chip = "None"
+        if chip and str(chip).lower() != 'none':
+            chip_map = {
+                'wildcard': 'WILDCARD',
+                'freehit': 'FREE HIT',
+                'bboost': 'BENCH BOOST',
+                '3xc': 'TRIPLE CAPTAIN'
+            }
+            display_chip = chip_map.get(str(chip).lower(), str(chip).upper())
+        # --- FIXED CHIP LOGIC END ---
+
         standings.append({
             'team': info['team'],
             'emoji': team_emoji,
@@ -296,16 +360,15 @@ def generate_html(gw, players):
             'total': total_points,
             'gw': points,
             'rank': live_rank,
-            'chip': 'WILDCARD' if 'wildcard' in str(chip).lower() else 'None',
+            'chip': display_chip,
             'yours': info['yours']
         })
     
-    # Standings
+    # Standings Sorting
     standings.sort(key=lambda x: x['total'], reverse=True)
     standings_html = ""
     for i, s in enumerate(standings, 1):
         row_class = ' class="yours"' if s['yours'] else ''
-        # Format rank with commas
         try:
             formatted_rank = f"#{int(s['rank']):,}"
         except:
