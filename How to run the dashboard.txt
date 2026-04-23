@@ -1,0 +1,4 @@
+python .\ZeeFPLScriptV1.py
+git add index.html
+git commit -m "Added GW33 Insight section"
+git push
