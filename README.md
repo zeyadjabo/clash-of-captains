@@ -22,3 +22,11 @@ The dashboard is powered by a Python engine that interacts with the official FPL
 1. Clone the repository:
    ```bash
    git clone [https://github.com/zeyadjabo/clash-of-captains.git](https://github.com/zeyadjabo/clash-of-captains.git)
+
+2. Install dependencies:
+pip install requests
+
+3. Run the update script:
+
+Bash
+python ZeeFPLScriptV1.py
