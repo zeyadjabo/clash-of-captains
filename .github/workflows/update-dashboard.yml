@@ -1,0 +1,31 @@
+name: Update FPL Dashboard
+
+on:
+  workflow_dispatch:   # Allows manual trigger from GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Dashboard Script
+        run: python dashboard_engine.py
+
+      - name: Commit & Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Dashboard auto-updated via Refresh button" || echo "No changes"
+          git push
