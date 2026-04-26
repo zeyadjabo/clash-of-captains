@@ -45,7 +45,7 @@
     h1 {
       text-align: center;
       font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.6rem, 8vw, 4.8rem);
+      font-size: clamp(2.4rem, 8vw, 4.5rem);
       font-weight: 900;
       letter-spacing: 6px;
       background: linear-gradient(90deg, #ffd700, #00f5ff);
@@ -54,10 +54,10 @@
       margin: 25px 0 8px;
     }
 
-    .subtitle { text-align:center; color:#00f5ff; font-size:1.15rem; letter-spacing:4px; margin-bottom:15px; }
+    .subtitle { text-align:center; color:#00f5ff; font-size:1.1rem; letter-spacing:4px; margin-bottom:15px; }
 
     .gw-highlight {
-      text-align:center; font-size: clamp(1.9rem, 6vw, 3rem); font-weight:900;
+      text-align:center; font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight:900;
       background:rgba(5,8,15,0.95); border:4px solid var(--neon-gold); color:var(--neon-gold);
       padding:18px; border-radius:20px; margin:15px auto; max-width:720px;
     }
@@ -75,18 +75,15 @@
     .league-table th {
       background: rgba(255,215,0,0.25);
       color: var(--neon-gold);
-      padding: 18px 12px;
-      font-size: 1.1rem;
+      padding: 16px 8px;
+      font-size: 1.05rem;
       font-weight: 700;
     }
     .league-table td {
-      padding: 16px 12px;
+      padding: 14px 8px;
       text-align: center;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .league-table tr.yours {
-      background: rgba(255,215,0,0.18) !important;
-      font-weight: bold;
+      font-size: 0.95rem;
     }
 
     .insight-box {
@@ -147,14 +144,18 @@
     .transfer-list small { color: #888; font-size: 0.9rem; }
 
     .refresh-btn {
-      display:block; margin:40px auto; padding:18px 55px; font-size:1.25rem; font-weight:900;
+      display:block; margin:40px auto; padding:18px 55px; font-size:1.2rem; font-weight:900;
       background:linear-gradient(45deg,#ffd700,#ffea00); color:#05080f; border:none;
       border-radius:50px; cursor:pointer;
     }
     .refresh-btn:hover { transform:scale(1.08); }
 
     @media (max-width: 768px) {
-      .container { grid-template-columns:1fr; }
+      .container { grid-template-columns:1fr; gap:20px; padding:0 10px; }
+      .league-table th, .league-table td { padding: 12px 6px; font-size: 0.9rem; }
+      h1 { font-size: 2.4rem; }
+      .gw-highlight { font-size: 1.8rem; padding: 14px; }
+      .insight-box { padding: 20px; margin: 25px 10px; }
       .insight-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -163,7 +164,7 @@
   <h1>CLASH OF CAPTAINS</h1>
   <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
   <div class="gw-highlight">GAMEWEEK 34</div>
-  <div class="update-time">Last scanned: 2026-04-25 09:00 PM EST<br>
+  <div class="update-time">Last scanned: 2026-04-25 09:18 PM EST<br>
   <span style="font-size: 0.9rem;">updated twice daily at 9 AM and 9 PM<br>and manual updates thru whatsapp requests</span></div>
 
   <div class="league-table">
