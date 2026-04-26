@@ -22,7 +22,6 @@ def get_bootstrap_data():
             processed = [e['id'] for e in events if e.get('data_checked') or e.get('finished')]
             current_gw = max(processed) if processed else events[-1]['id']
         
-        # Player lookup dictionary
         players = {p['id']: p['web_name'] for p in data.get('elements', [])}
         
         print(f"Debug: GW {current_gw} detected")
@@ -61,6 +60,66 @@ def get_transfers(entry_id, gw):
         except:
             pass
     return []
+
+# ====================== INSIGHTS ======================
+def get_insights(gw):
+    insights = {
+        34: {
+            "title": "GW34 INSIGHT (Blank Gameweek)",
+            "captains": ["Bruno Fernandes (MUN)", "Alexander Isak (NEW)", "Mohamed Salah (LIV)"],
+            "buys": ["Bruno Fernandes", "Alexander Isak", "Matheus Cunha"],
+            "sells": ["Arsenal assets", "Chelsea assets", "Man City assets"],
+            "note": "This is a Blank Gameweek for several big teams. Free Hit is very popular."
+        },
+        35: {
+            "title": "GW35 INSIGHT (Title Race Heat)",
+            "captains": ["Mohamed Salah (LIV)", "Erling Haaland (MCI)", "Alexander Isak (NEW)"],
+            "buys": ["Phil Foden", "Bryan Mbeumo", "Bukayo Saka"],
+            "sells": ["Dominic Solanke", "Douglas Luiz", "Man Utd Defenders"],
+            "note": "Heavy investment in top teams is advised for the run-in."
+        }
+    }
+    
+    data = insights.get(gw, {
+        "title": f"GW{gw} INSIGHT",
+        "captains": ["Mohamed Salah", "Erling Haaland", "Bruno Fernandes"],
+        "buys": ["Hot form players"],
+        "sells": ["Underperforming assets"],
+        "note": "Focus on good fixtures."
+    })
+    
+    return f"""
+    <!-- GW Insight -->
+    <div class="insight-box">
+      <h2>🔥 {data['title']}</h2>
+      <div class="insight-grid">
+        <div class="insight-item">
+          <strong>Best Captain Options:</strong><br>
+          1. {data['captains'][0]}<br>
+          2. {data['captains'][1]}<br>
+          3. {data['captains'][2]}
+        </div>
+        <div class="insight-item">
+          <strong>Recommended Buys:</strong><br>
+          1. {data['buys'][0]}<br>
+          2. {data['buys'][1]}<br>
+          3. {data['buys'][2]}
+        </div>
+        <div class="insight-item">
+          <strong>Recommended Sells:</strong><br>
+          1. {data['sells'][0]}<br>
+          2. {data['sells'][1]}<br>
+          3. {data['sells'][2]}
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:20px; font-style:italic; color:#aaa;">
+        {data['note']}
+      </p>
+      <p style="text-align:center; margin-top:25px; font-size:1.1rem; color:#ff2d55; font-weight:bold;">
+        The best advice would be to do the opposite of what the great Joey Yakeera suggests.
+      </p>
+    </div>
+    """
 
 # ====================== HTML TEMPLATE ======================
 HTML_TEMPLATE = """<!DOCTYPE html>
@@ -247,46 +306,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </table>
   </div>
 
-  <!-- GW34 INSIGHT -->
-  <div class="insight-box">
-    <h2>🔥 GW34 INSIGHT (Blank Gameweek)</h2>
-    <div class="insight-grid">
-      <div class="insight-item">
-        <strong>Best Captain Options:</strong><br>
-        1. Bruno Fernandes (MUN)<br>
-        2. Alexander Isak (NEW)<br>
-        3. Mohamed Salah (LIV)
-      </div>
-      <div class="insight-item">
-        <strong>Recommended Buys:</strong><br>
-        1. Bruno Fernandes<br>
-        2. Alexander Isak<br>
-        3. Matheus Cunha
-      </div>
-      <div class="insight-item">
-        <strong>Recommended Sells:</strong><br>
-        1. Arsenal assets (many blank)<br>
-        2. Chelsea assets (blank)<br>
-        3. Man City assets (blank)
-      </div>
-    </div>
-    <p style="text-align:center; margin-top:20px; font-style:italic; color:#aaa;">
-      This is a **Blank Gameweek** for several big teams (MCI, CHE, BHA, etc.). Only ~14 teams play. Free Hit is very popular this week.
-    </p>
-    <p style="text-align:center; margin-top:25px; font-size:1.1rem; color:#ff2d55; font-weight:bold;">
-      The best advice would be to do the opposite of what the great Joey Yakeera suggests.
-    </p>
-  </div>
+{insight_html}
 
-  <button class="refresh-btn" onclick="location.reload()">
-    <i class="fas fa-sync"></i> REFRESH DASHBOARD
+  <button class="refresh-btn" onclick="window.open('https://github.com/Zeyad_Jabo/clash-of-captains/actions/workflows/update-dashboard.yml', '_blank')">
+    <i class="fas fa-sync"></i> LIVE REFRESH DASHBOARD
   </button>
 
   <div class="container">{cards}</div>
 </body>
 </html>"""
 
-# CARD TEMPLATE (Simplified + Transfers)
+# ====================== CARD TEMPLATE ======================
 CARD_TEMPLATE = """
 <div class="card {yours_class}">
   <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">{team} <small style="color:#888;">({manager})</small></h2>
@@ -299,7 +329,6 @@ CARD_TEMPLATE = """
 def generate_html(gw, players):
     cards = []
     standings = []
-    # Removed " EST" here because it's already in the HTML_TEMPLATE
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M") 
     
     for mid, info in MANAGERS.items():
@@ -307,7 +336,6 @@ def generate_html(gw, players):
         points, chip = get_picks(mid, gw)
         transfers = get_transfers(mid, gw)
         
-        # Clean Transfers with proper name lookup
         trans_lines = []
         for t in transfers:
             in_id = t.get('element_in')
@@ -332,27 +360,18 @@ def generate_html(gw, players):
             transfers_html=transfers_html
         ))
         
-        # Emojis for each team
         emojis = {
             "Sesko n Destroy": "🔥🥇",
             "Fergie Time United": "🇪🇬👑🥈",
             "BAKHAAT": "💩"
         }
-        
         team_emoji = emojis.get(info['team'], "⚽")
         
-        # --- FIXED CHIP LOGIC START ---
         display_chip = "None"
         if chip and str(chip).lower() != 'none':
-            chip_map = {
-                'wildcard': 'WILDCARD',
-                'freehit': 'FREE HIT',
-                'bboost': 'BENCH BOOST',
-                '3xc': 'TRIPLE CAPTAIN'
-            }
+            chip_map = {'wildcard': 'WILDCARD', 'freehit': 'FREE HIT', 'bboost': 'BENCH BOOST', '3xc': 'TRIPLE CAPTAIN'}
             display_chip = chip_map.get(str(chip).lower(), str(chip).upper())
-        # --- FIXED CHIP LOGIC END ---
-
+        
         standings.append({
             'team': info['team'],
             'emoji': team_emoji,
@@ -364,7 +383,6 @@ def generate_html(gw, players):
             'yours': info['yours']
         })
     
-    # Standings Sorting
     standings.sort(key=lambda x: x['total'], reverse=True)
     standings_html = ""
     for i, s in enumerate(standings, 1):
@@ -373,7 +391,7 @@ def generate_html(gw, players):
             formatted_rank = f"#{int(s['rank']):,}"
         except:
             formatted_rank = f"#{s['rank']}"
-  
+        
         standings_html += f"""
         <tr{row_class}>
           <td><strong>#{i}</strong></td>
@@ -385,7 +403,15 @@ def generate_html(gw, players):
           <td>{s['chip']}</td>
         </tr>"""
     
-    full_html = HTML_TEMPLATE.format(gw=gw, timestamp=timestamp, cards='\n'.join(cards), standings_html=standings_html)
+    insight_html = get_insights(gw)
+    
+    full_html = HTML_TEMPLATE.format(
+        gw=gw, 
+        timestamp=timestamp, 
+        cards='\n'.join(cards), 
+        standings_html=standings_html,
+        insight_html=insight_html
+    )
     
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(full_html)
@@ -394,10 +420,10 @@ def generate_html(gw, players):
 
 # MAIN
 if __name__ == "__main__":
-    print("Generating MILF FPL Dashboard...")
+    print("Generating Clash of Captains Dashboard...")
     try:
-        gw, players = get_bootstrap_data()   # ← changed here
+        gw, players = get_bootstrap_data()
         print(f"→ Gameweek: {gw}")
-        generate_html(gw, players)           # ← pass players
+        generate_html(gw, players)
     except Exception as e:
         print(f"Error: {e}")
