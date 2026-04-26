@@ -1,11 +1,15 @@
 name: Update FPL Dashboard
 
 on:
-  workflow_dispatch:   # Allows manual trigger from GitHub
+  workflow_dispatch:      # Manual refresh button
+  schedule:
+    - cron: '0 8 * * *'   # Runs every day at 8:00 AM UTC (3:00 AM CDT / Chicago time)
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -22,10 +26,14 @@ jobs:
       - name: Run Dashboard Script
         run: python dashboard_engine.py
 
-      - name: Commit & Push changes
+      - name: Commit & Push if changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Dashboard auto-updated via Refresh button" || echo "No changes"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Dashboard auto-updated (GW${{ github.event.inputs.gw || 'auto' }})"
+            git push
+          fi
