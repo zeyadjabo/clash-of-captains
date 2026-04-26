@@ -62,7 +62,6 @@ def get_transfers(entry_id, gw):
     return []
 
 # ====================== INSIGHTS ======================
-# ====================== INSIGHTS ======================
 def get_insights(current_gw):
     next_gw = current_gw + 1
     
@@ -75,11 +74,11 @@ def get_insights(current_gw):
             "note": "This is a Blank Gameweek for several big teams. Free Hit is very popular."
         },
         35: {
-          "title": "GW35 INSIGHT (Title Race Heat)",
-          "captains": ["Erling Haaland (MCI)", "Mohamed Salah (LIV)", "Bruno Fernandes (MUN)"],
-          "buys": ["Gabriel (ARS)", "Matheus Cunha (MUN)", "Morgan Gibbs-White (NFO)"],
-          "sells": ["Ollie Watkins", "Ivan Toney", "Man Utd Defenders"],
-          "note": "Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint."
+            "title": "GW35 INSIGHT (Title Race Heat)",
+            "captains": ["Erling Haaland (MCI)", "Mohamed Salah (LIV)", "Bruno Fernandes (MUN)"],
+            "buys": ["Gabriel (ARS)", "Matheus Cunha (MUN)", "Morgan Gibbs-White (NFO)"],
+            "sells": ["Ollie Watkins", "Ivan Toney", "Man Utd Defenders"],
+            "note": "Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint."
         }
     }
     
