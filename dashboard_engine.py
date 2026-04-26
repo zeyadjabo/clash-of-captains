@@ -287,7 +287,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <h1>CLASH OF CAPTAINS</h1>
   <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
   <div class="gw-highlight">GAMEWEEK {gw}</div>
-  <div class="update-time">Last scanned: {timestamp} EST</div>
+  <div class="update-time">Last scanned: {timestamp} EST<br>
+  <span style="font-size: 0.9rem;">updated twice daily at 9 AM and 9 PM<br>and manual updates thru whatsapp requests</span></div>
 
   <div class="league-table">
     <table>
@@ -308,10 +309,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 {insight_html}
 
-  <button class="refresh-btn" onclick="window.open('https://github.com/Zeyad_Jabo/clash-of-captains/actions/workflows/update-dashboard.yml', '_blank')">
-    <i class="fas fa-sync"></i> LIVE REFRESH DASHBOARD
-  </button>
-
   <div class="container">{cards}</div>
 </body>
 </html>"""
@@ -329,7 +326,7 @@ CARD_TEMPLATE = """
 def generate_html(gw, players):
     cards = []
     standings = []
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M") 
+    timestamp = datetime.now().strftime("%Y-%m-%d %I:%M %p") 
     
     for mid, info in MANAGERS.items():
         total_points, live_rank = get_manager_summary(mid)

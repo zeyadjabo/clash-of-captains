@@ -1,9 +1,10 @@
 name: Update FPL Dashboard
 
 on:
-  workflow_dispatch:      # Manual refresh button
   schedule:
-    - cron: '0 8 * * *'   # Runs every day at 8:00 AM UTC (3:00 AM CDT / Chicago time)
+    - cron: '0 8 * * *'     # Every day at 8:00 AM UTC (3 AM Chicago)
+    - cron: '0 20 * * *'    # Every day at 8:00 PM UTC (3 PM Chicago)
+  workflow_dispatch:        # Allows you to run manually
 
 jobs:
   update:
@@ -34,6 +35,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Dashboard auto-updated (GW${{ github.event.inputs.gw || 'auto' }})"
+            git commit -m "Dashboard auto-updated"
             git push
           fi
