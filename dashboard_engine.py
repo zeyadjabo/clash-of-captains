@@ -62,7 +62,10 @@ def get_transfers(entry_id, gw):
     return []
 
 # ====================== INSIGHTS ======================
-def get_insights(gw):
+# ====================== INSIGHTS ======================
+def get_insights(current_gw):
+    next_gw = current_gw + 1
+    
     insights = {
         34: {
             "title": "GW34 INSIGHT (Blank Gameweek)",
@@ -72,16 +75,16 @@ def get_insights(gw):
             "note": "This is a Blank Gameweek for several big teams. Free Hit is very popular."
         },
         35: {
-            "title": "GW35 INSIGHT (Title Race Heat)",
-            "captains": ["Mohamed Salah (LIV)", "Erling Haaland (MCI)", "Alexander Isak (NEW)"],
-            "buys": ["Phil Foden", "Bryan Mbeumo", "Bukayo Saka"],
-            "sells": ["Dominic Solanke", "Douglas Luiz", "Man Utd Defenders"],
-            "note": "Heavy investment in top teams is advised for the run-in."
+          "title": "GW35 INSIGHT (Title Race Heat)",
+          "captains": ["Erling Haaland (MCI)", "Mohamed Salah (LIV)", "Bruno Fernandes (MUN)"],
+          "buys": ["Gabriel (ARS)", "Matheus Cunha (MUN)", "Morgan Gibbs-White (NFO)"],
+          "sells": ["Ollie Watkins", "Ivan Toney", "Man Utd Defenders"],
+          "note": "Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint."
         }
     }
     
-    data = insights.get(gw, {
-        "title": f"GW{gw} INSIGHT",
+    data = insights.get(next_gw, {
+        "title": f"GW{next_gw} INSIGHT",
         "captains": ["Mohamed Salah", "Erling Haaland", "Bruno Fernandes"],
         "buys": ["Hot form players"],
         "sells": ["Underperforming assets"],
