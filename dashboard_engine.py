@@ -329,7 +329,12 @@ CARD_TEMPLATE = """
 def generate_html(gw, players):
     cards = []
     standings = []
-    timestamp = datetime.now().strftime("%Y-%m-%d %I:%M %p") 
+    from datetime import timezone
+    from zoneinfo import ZoneInfo
+    
+    # Use explicit EST timezone to ensure consistent display
+    est = ZoneInfo("America/New_York")
+    timestamp = datetime.now(est).strftime("%Y-%m-%d %I:%M %p %Z")
     
     for mid, info in MANAGERS.items():
         total_points, live_rank = get_manager_summary(mid)
