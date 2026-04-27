@@ -290,7 +290,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <h1>CLASH OF CAPTAINS</h1>
   <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
   <div class="gw-highlight">GAMEWEEK {gw}</div>
-  <div class="update-time">Last scanned: {timestamp} EST<br>
+  <div class="update-time">Last scanned: {timestamp}<br>
   <span style="font-size: 0.9rem;">updated twice daily at 9 AM and 9 PM<br>and manual updates thru whatsapp requests</span></div>
 
   <div class="league-table">
