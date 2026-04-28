@@ -136,7 +136,6 @@ def generate_history_chart():
 
     if len(fig.data) > 0:
         fig.update_layout(
-            title="Clash of Captains - Historical Overall Rank Progress 25/26 season",
             xaxis_title="Gameweek",
             yaxis_title="Overall Rank",
             template="plotly_dark",
