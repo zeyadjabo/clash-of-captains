@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clash of Captains - FPL Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@400;600;700&display=swap');
 
@@ -14,7 +15,12 @@
       --dark-bg: #05080f;
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Exo 2', sans-serif;
       background: var(--dark-bg);
@@ -23,24 +29,42 @@
       position: relative;
     }
 
-    body::before, body::after {
-      content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
     }
+
     body::before {
-      background: radial-gradient(circle at 30% 20%, rgba(255,215,0,0.10), transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(0,245,255,0.10), transparent 50%);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,215,0,0.10), transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(0,245,255,0.10), transparent 50%);
       animation: bgPulse 25s infinite alternate;
     }
-    @keyframes bgPulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+    @keyframes bgPulse {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
 
     body::after {
-      background: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+      background:
+        linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       animation: gridMove 60s linear infinite;
       z-index: -1;
     }
-    @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 120px 120px; } }
+
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 120px 120px; }
+    }
 
     h1 {
       text-align: center;
@@ -54,12 +78,31 @@
       margin: 25px 0 8px;
     }
 
-    .subtitle { text-align:center; color:#00f5ff; font-size:1.1rem; letter-spacing:4px; margin-bottom:15px; }
+    .subtitle {
+      text-align: center;
+      color: #00f5ff;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      margin-bottom: 15px;
+    }
 
     .gw-highlight {
-      text-align:center; font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight:900;
-      background:rgba(5,8,15,0.95); border:4px solid var(--neon-gold); color:var(--neon-gold);
-      padding:18px; border-radius:20px; margin:15px auto; max-width:720px;
+      text-align: center;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      font-weight: 900;
+      background: rgba(5,8,15,0.95);
+      border: 4px solid var(--neon-gold);
+      color: var(--neon-gold);
+      padding: 18px;
+      border-radius: 20px;
+      margin: 15px auto;
+      max-width: 720px;
+    }
+
+    .update-time {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 25px;
     }
 
     .league-table {
@@ -71,7 +114,12 @@
       border: 4px solid var(--neon-gold);
       box-shadow: 0 0 70px rgba(255,215,0,0.5);
     }
-    .league-table table { width:100%; border-collapse:collapse; }
+
+    .league-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
     .league-table th {
       background: rgba(255,215,0,0.25);
       color: var(--neon-gold);
@@ -79,6 +127,7 @@
       font-size: 1.05rem;
       font-weight: 700;
     }
+
     .league-table td {
       padding: 14px 8px;
       text-align: center;
@@ -86,54 +135,112 @@
       font-size: 0.95rem;
     }
 
+    .league-table tr.yours td:first-child {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
     .insight-box {
       max-width: 1100px;
       margin: 40px auto;
-      background: rgba(15,22,45,0.96);
-      border-radius: 20px;
-      padding: 25px;
+      padding: 28px 26px 24px;
+      background: #10172b;
       border: 3px solid var(--neon-gold);
-      box-shadow: 0 0 60px rgba(255,215,0,0.4);
+      border-radius: 18px;
+      color: #dce3f0;
+      box-shadow: 0 0 60px rgba(255,215,0,0.35);
     }
+
     .insight-box h2 {
-      color: var(--neon-gold);
+      margin: 0 0 20px;
       text-align: center;
-      margin-bottom: 20px;
+      color: var(--neon-gold);
       font-size: 1.6rem;
+      font-weight: 900;
     }
+
     .insight-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
     }
+
     .insight-item {
-      background: rgba(0,0,0,0.3);
-      padding: 14px;
-      border-radius: 12px;
+      background: #080e1e;
+      border-radius: 10px;
+      padding: 16px 14px;
+      font-size: 1rem;
+      line-height: 1.25;
+      font-weight: 600;
+      color: #dce3f0;
     }
-    .insight-item strong { color: #ffd700; }
+
+    .insight-item strong {
+      color: var(--neon-gold);
+      font-weight: 900;
+    }
+
+    .insight-note {
+      text-align: center;
+      margin: 22px auto 0;
+      font-style: italic;
+      color: #b8b8b8;
+      font-size: 1rem;
+    }
+
+    .insight-warning {
+      text-align: center;
+      margin: 26px 0 0;
+      color: #ff2d55;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .history-chart-box {
+      max-width: 1200px;
+      margin: 40px auto;
+      text-align: center;
+    }
+
+    .history-chart-box h2 {
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .history-chart-box iframe {
+      width: 100%;
+      height: 750px;
+      border: none;
+      border-radius: 16px;
+      background: #0a0e17;
+    }
 
     .container {
-      max-width:1400px;
-      margin:40px auto;
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(420px,1fr));
-      gap:28px;
-      padding:0 15px;
+      max-width: 1400px;
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px,1fr));
+      gap: 28px;
+      padding: 0 15px;
     }
 
     .card {
-      background:linear-gradient(145deg, rgba(15,22,45,0.96), rgba(8,12,28,0.98));
-      border-radius:24px;
-      padding:26px;
-      border:2px solid rgba(255,215,0,0.3);
+      background: linear-gradient(145deg, rgba(15,22,45,0.96), rgba(8,12,28,0.98));
+      border-radius: 24px;
+      padding: 26px;
+      border: 2px solid rgba(255,215,0,0.3);
     }
-    .card.yours { border-color:var(--neon-gold); }
+
+    .card.yours {
+      border-color: var(--neon-gold);
+    }
 
     .transfer-list {
       list-style: none;
       padding: 0;
     }
+
     .transfer-list li {
       background: rgba(0,0,0,0.45);
       padding: 14px 16px;
@@ -141,31 +248,78 @@
       border-radius: 12px;
       border-left: 5px solid #ff2d55;
     }
-    .transfer-list small { color: #888; font-size: 0.9rem; }
 
-    .refresh-btn {
-      display:block; margin:40px auto; padding:18px 55px; font-size:1.2rem; font-weight:900;
-      background:linear-gradient(45deg,#ffd700,#ffea00); color:#05080f; border:none;
-      border-radius:50px; cursor:pointer;
+    .transfer-list small {
+      color: #888;
+      font-size: 0.9rem;
     }
-    .refresh-btn:hover { transform:scale(1.08); }
+
+    .transfer-out {
+      color: #ff2d55;
+      font-weight: 700;
+    }
+
+    .transfer-in {
+      color: #00f5ff;
+      font-weight: 700;
+    }
 
     @media (max-width: 768px) {
-      .container { grid-template-columns:1fr; gap:20px; padding:0 10px; }
-      .league-table th, .league-table td { padding: 12px 6px; font-size: 0.9rem; }
-      h1 { font-size: 2.4rem; }
-      .gw-highlight { font-size: 1.8rem; padding: 14px; }
-      .insight-box { padding: 20px; margin: 25px 10px; }
-      .insight-grid { grid-template-columns: 1fr; }
+      .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 10px;
+      }
+
+      .league-table th,
+      .league-table td {
+        padding: 12px 6px;
+        font-size: 0.9rem;
+      }
+
+      h1 {
+        font-size: 2.4rem;
+      }
+
+      .gw-highlight {
+        font-size: 1.8rem;
+        padding: 14px;
+      }
+
+      .insight-box {
+        padding: 20px;
+        margin: 25px 10px;
+      }
+
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .history-chart-box {
+        margin: 25px 10px;
+      }
+
+      .history-chart-box iframe {
+        height: 550px;
+      }
     }
   </style>
 </head>
+
 <body>
   <h1>CLASH OF CAPTAINS</h1>
+
   <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
+
   <div class="gw-highlight">GAMEWEEK 34</div>
-  <div class="update-time">Last scanned: 2026-04-27 06:49 PM EDT<br>
-  <span style="font-size: 0.9rem;">updated twice daily at 9 AM and 9 PM<br>and manual updates thru whatsapp requests</span></div>
+
+  <div class="update-time">
+    Last scanned: 2026-04-27 08:15 PM EDT EST<br>
+    <span style="font-size: 0.9rem;">
+      updated twice daily at 9 AM and 9 PM<br>
+      and manual updates thru whatsapp requests
+    </span>
+  </div>
 
   <div class="league-table">
     <table>
@@ -211,10 +365,11 @@
     </table>
   </div>
 
-
+  
     <!-- GW Insight -->
     <div class="insight-box">
       <h2>🔥 GW35 INSIGHT (Title Race Heat)</h2>
+
       <div class="insight-grid">
         <div class="insight-item">
           <strong>Best Captain Options:</strong><br>
@@ -222,12 +377,14 @@
           2. Mohamed Salah (LIV)<br>
           3. Bruno Fernandes (MUN)
         </div>
+
         <div class="insight-item">
           <strong>Recommended Buys:</strong><br>
           1. Gabriel (ARS)<br>
           2. Matheus Cunha (MUN)<br>
           3. Morgan Gibbs-White (NFO)
         </div>
+
         <div class="insight-item">
           <strong>Recommended Sells:</strong><br>
           1. Ollie Watkins<br>
@@ -235,38 +392,53 @@
           3. Man Utd Defenders
         </div>
       </div>
-      <p style="text-align:center; margin-top:20px; font-style:italic; color:#aaa;">
+
+      <p class="insight-note">
         Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint.
       </p>
-      <p style="text-align:center; margin-top:25px; font-size:1.1rem; color:#ff2d55; font-weight:bold;">
+
+      <p class="insight-warning">
         The best advice would be to do the opposite of what the great Joey Yakeera suggests.
       </p>
     </div>
     
 
+  <div class="history-chart-box">
+    <h2>Historical Rank Progress</h2>
+    <iframe src="history_chart.html"></iframe>
+  </div>
+
   <div class="container">
+    
 <div class="card yours">
-  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">Sesko n Destroy <small style="color:#888;">(Zee)</small></h2>
-  
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">
+    Sesko n Destroy <small style="color:#888;">(Zee)</small>
+  </h2>
+
   <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
   <ul class="transfer-list"><li><span class='transfer-out'>Isak</span> ↔ <span class='transfer-in'>Beto</span><br><small>£0.0 → £0.0 • 2026-04-24 13:37</small></li><li><span class='transfer-out'>Casemiro</span> ↔ <span class='transfer-in'>Summerville</span><br><small>£0.0 → £0.0 • 2026-04-24 13:37</small></li><li><span class='transfer-out'>Ndiaye</span> ↔ <span class='transfer-in'>M.Salah</span><br><small>£0.0 → £0.0 • 2026-04-24 13:37</small></li><li><span class='transfer-out'>Mukiele</span> ↔ <span class='transfer-in'>Alderete</span><br><small>£0.0 → £0.0 • 2026-04-24 13:37</small></li><li><span class='transfer-out'>Roefs</span> ↔ <span class='transfer-in'>Hermansen</span><br><small>£0.0 → £0.0 • 2026-04-24 13:37</small></li><li><span class='transfer-out'>Wilson</span> ↔ <span class='transfer-in'>Casemiro</span><br><small>£0.0 → £0.0 • 2026-04-23 01:15</small></li><li><span class='transfer-out'>Calvert-Lewin</span> ↔ <span class='transfer-in'>Thiago</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Haaland</span> ↔ <span class='transfer-in'>Solanke</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>João Pedro</span> ↔ <span class='transfer-in'>Isak</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Groß</span> ↔ <span class='transfer-in'>Cunha</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Anderson</span> ↔ <span class='transfer-in'>Ndiaye</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Gordon</span> ↔ <span class='transfer-in'>Wilson</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Palmer</span> ↔ <span class='transfer-in'>B.Fernandes</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>O'Reilly</span> ↔ <span class='transfer-in'>Mukiele</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Struijk</span> ↔ <span class='transfer-in'>Saliba</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Guéhi</span> ↔ <span class='transfer-in'>Mavropanos</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Darlow</span> ↔ <span class='transfer-in'>Roefs</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li><li><span class='transfer-out'>Verbruggen</span> ↔ <span class='transfer-in'>Woodman</span><br><small>£0.0 → £0.0 • 2026-04-22 13:29</small></li></ul>
 </div>
 
 
 <div class="card ">
-  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">Fergie Time United <small style="color:#888;">(Sam)</small></h2>
-  
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">
+    Fergie Time United <small style="color:#888;">(Sam)</small>
+  </h2>
+
   <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
   <ul class="transfer-list"><li><span class='transfer-out'>Diouf</span> ↔ <span class='transfer-in'>Mavropanos</span><br><small>£0.0 → £0.0 • 2026-04-24 16:49</small></li><li><span class='transfer-out'>Solanke</span> ↔ <span class='transfer-in'>Havertz</span><br><small>£0.0 → £0.0 • 2026-04-24 16:48</small></li><li><span class='transfer-out'>Xavi</span> ↔ <span class='transfer-in'>Wilson</span><br><small>£0.0 → £0.0 • 2026-04-24 16:48</small></li><li><span class='transfer-out'>Mané</span> ↔ <span class='transfer-in'>Solanke</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Cunha</span> ↔ <span class='transfer-in'>Dewsbury-Hall</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Rice</span> ↔ <span class='transfer-in'>Xavi</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Mavropanos</span> ↔ <span class='transfer-in'>Diouf</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Gabriel</span> ↔ <span class='transfer-in'>Saliba</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Kinsky</span> ↔ <span class='transfer-in'>Raya</span><br><small>£0.0 → £0.0 • 2026-04-23 18:06</small></li><li><span class='transfer-out'>Calvert-Lewin</span> ↔ <span class='transfer-in'>Mané</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Haaland</span> ↔ <span class='transfer-in'>Watkins</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Groß</span> ↔ <span class='transfer-in'>Cunha</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Palmer</span> ↔ <span class='transfer-in'>M.Salah</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Tavernier</span> ↔ <span class='transfer-in'>Rice</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Semenyo</span> ↔ <span class='transfer-in'>Gibbs-White</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Justin</span> ↔ <span class='transfer-in'>Heaven</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>O'Reilly</span> ↔ <span class='transfer-in'>Gabriel</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Van Hecke</span> ↔ <span class='transfer-in'>Pedro Porro</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Hill</span> ↔ <span class='transfer-in'>Mavropanos</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Darlow</span> ↔ <span class='transfer-in'>Woodman</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li><li><span class='transfer-out'>Verbruggen</span> ↔ <span class='transfer-in'>Kinsky</span><br><small>£0.0 → £0.0 • 2026-04-23 17:02</small></li></ul>
 </div>
 
 
 <div class="card ">
-  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">BAKHAAT <small style="color:#888;">(Joey)</small></h2>
-  
+  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">
+    BAKHAAT <small style="color:#888;">(Joey)</small>
+  </h2>
+
   <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
   <ul class="transfer-list"><li><span class='transfer-out'>Dewsbury-Hall</span> ↔ <span class='transfer-in'>Okafor</span><br><small>£0.0 → £0.0 • 2026-04-24 02:00</small></li><li><span class='transfer-out'>Cunha</span> ↔ <span class='transfer-in'>Xavi</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Gyökeres</span> ↔ <span class='transfer-in'>Šeško</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Anderson</span> ↔ <span class='transfer-in'>Dewsbury-Hall</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Thiago</span> ↔ <span class='transfer-in'>Bowen</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Ekitiké</span> ↔ <span class='transfer-in'>Solanke</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Mac Allister</span> ↔ <span class='transfer-in'>Rogers</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Schade</span> ↔ <span class='transfer-in'>Szoboszlai</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Virgil</span> ↔ <span class='transfer-in'>Struijk</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>J.Timber</span> ↔ <span class='transfer-in'>Gabriel</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>James</span> ↔ <span class='transfer-in'>O'Reilly</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Dúbravka</span> ↔ <span class='transfer-in'>Henderson</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li><li><span class='transfer-out'>Areola</span> ↔ <span class='transfer-in'>Raya</span><br><small>£0.0 → £0.0 • 2026-04-24 01:58</small></li></ul>
 </div>
-</div>
+
+  </div>
 </body>
 </html>
