@@ -126,8 +126,8 @@ def generate_history_chart():
                 y=overall_ranks,
                 mode="lines+markers",
                 name=f"{info['team']} ({info['name']})",
-                line=dict(width=4),
-                marker=dict(size=8)
+                line=dict(width=3),
+                marker=dict(size=6)
             ))
 
             print(f"✓ Loaded {len(gws)} gameweeks for {info['team']}")
@@ -140,7 +140,9 @@ def generate_history_chart():
             xaxis_title="Gameweek",
             yaxis_title="Overall Rank",
             template="plotly_dark",
-            height=750,
+            autosize=True,
+            height=680,
+            margin=dict(l=70, r=20, t=70, b=60),
             legend=dict(
                 yanchor="top",
                 y=0.99,
@@ -386,9 +388,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .update-time {{
-      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 25px;
+      padding: 0 15px;
+      text-align: left;
       color: #aaa;
-      margin-bottom: 25px;
+      font-size: 0.9rem;
+      line-height: 1.45;
     }}
 
     .league-table {{
@@ -496,7 +502,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .history-chart-box .plotly-graph-div {{
       width: 100% !important;
-      min-height: 750px;
+      height: 680px !important;
+      min-height: 0;
       border-radius: 16px;
       background: #0a0e17;
     }}
@@ -585,7 +592,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }}
 
       .history-chart-box .plotly-graph-div {{
-        min-height: 550px;
+        height: 520px !important;
+      }}
+
+      .update-time {{
+        max-width: 100%;
+        margin-bottom: 18px;
+        font-size: 0.78rem;
       }}
     }}
   </style>
@@ -599,8 +612,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="gw-highlight">GAMEWEEK {gw}</div>
 
   <div class="update-time">
-    Last scanned: {timestamp} EST<br>
-    <span style="font-size: 0.9rem;">
+    Last scanned: {timestamp}<br>
+    <span>
       updated twice daily at 9 AM and 9 PM<br>
       and manual updates thru whatsapp requests
     </span>
@@ -629,6 +642,42 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <h2>Historical Rank Progress</h2>
     {history_chart_html}
   </div>
+
+  <script>
+    function tuneHistoryChart() {{
+      if (!window.Plotly) return;
+
+      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
+      if (!chart) return;
+
+      var mobile = window.matchMedia("(max-width: 768px)").matches;
+
+      Plotly.restyle(chart, {{
+        "line.width": mobile ? 2 : 3,
+        "marker.size": mobile ? 4 : 6
+      }});
+
+      Plotly.relayout(chart, {{
+        height: mobile ? 520 : 680,
+        margin: mobile
+          ? {{ l: 48, r: 8, t: 46, b: 48 }}
+          : {{ l: 70, r: 20, t: 70, b: 60 }},
+        font: {{ size: mobile ? 10 : 12 }},
+        "title.font.size": mobile ? 13 : 18,
+        "legend.orientation": mobile ? "h" : "v",
+        "legend.x": mobile ? 0 : 0.01,
+        "legend.y": mobile ? 1.16 : 0.99,
+        "legend.xanchor": "left",
+        "legend.yanchor": "top",
+        "xaxis.dtick": mobile ? 4 : 1,
+        "xaxis.title.text": mobile ? "GW" : "Gameweek",
+        "yaxis.title.text": mobile ? "Rank" : "Overall Rank"
+      }});
+    }}
+
+    window.addEventListener("load", tuneHistoryChart);
+    window.addEventListener("resize", tuneHistoryChart);
+  </script>
 
   <div class="container">
     {cards}
