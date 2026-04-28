@@ -130,9 +130,9 @@ def generate_history_chart():
                 marker=dict(size=6)
             ))
 
-            print(f"✓ Loaded {len(gws)} gameweeks for {info['team']}")
+            print(f"Loaded {len(gws)} gameweeks for {info['team']}")
         else:
-            print(f"⚠️ No data for {info['team']}")
+            print(f"No data for {info['team']}")
 
     if len(fig.data) > 0:
         fig.update_layout(
@@ -159,7 +159,7 @@ def generate_history_chart():
             )
         )
 
-        print("\n✅ History chart created successfully!")
+        print("\nHistory chart created successfully!")
 
         return fig.to_html(
             full_html=False,
@@ -180,6 +180,69 @@ def safe_get(items, index, fallback=""):
         return items[index]
     except Exception:
         return fallback
+
+
+def format_number(value):
+    try:
+        return f"{int(value):,}"
+    except Exception:
+        return str(value)
+
+
+def format_rank(value):
+    try:
+        return f"#{int(value):,}"
+    except Exception:
+        return f"#{value}"
+
+
+def build_summary_html(standings, gw):
+    if not standings:
+        return ""
+
+    leader = standings[0]
+    second = standings[1] if len(standings) > 1 else standings[0]
+    best_gw = max(standings, key=lambda s: s["gw"])
+    leader_gap = max(leader["total"] - second["total"], 0)
+    active_chips = [s for s in standings if s["chip"] != "None"]
+    chip_items = "".join(
+        f'<span class="chip-desk-pill">{s["manager"]}: {s["chip"]}</span>'
+        for s in active_chips
+    ) or '<span class="chip-desk-pill muted">No active chips</span>'
+
+    return f"""
+  <section class="summary-grid" aria-label="Executive summary">
+    <article class="metric-card gw-card">
+      <span class="metric-label">Live Race</span>
+      <strong>GW{gw}</strong>
+      <small>Season 25/26</small>
+    </article>
+
+    <article class="metric-card accent-gold">
+      <span class="metric-label">Leader</span>
+      <strong>{leader['emoji']} {leader['team']}</strong>
+      <small>{leader['manager']} • {format_number(leader['total'])} pts</small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-label">Race Gap</span>
+      <strong>{leader_gap} pts</strong>
+      <small>1st to 2nd</small>
+    </article>
+
+    <article class="metric-card accent-cyan">
+      <span class="metric-label">Best GW</span>
+      <strong>{best_gw['gw']} pts</strong>
+      <small>{best_gw['manager']} this week</small>
+    </article>
+
+    <article class="metric-card wide">
+      <span class="metric-label">Chip Desk</span>
+      <div class="chip-desk-list">{chip_items}</div>
+      <small>Current gameweek activity</small>
+    </article>
+  </section>
+"""
 
 
 def get_insights(current_gw):
@@ -245,31 +308,40 @@ def get_insights(current_gw):
         ],
         "note": "Focus on good fixtures, nailed starters, and players with strong form."
     })
+    clean_title = data["title"].split(" (", 1)[0]
 
     return f"""
-    <div class="insight-box">
-      <h2>🔥 {data['title']}</h2>
+  <section class="section-panel insight-box">
+    <div class="section-heading">
+      <h2>{clean_title}</h2>
+    </div>
 
       <div class="insight-grid">
         <div class="insight-item">
-          <strong>Best Captain Options:</strong><br>
+          <strong>Best Captain Options</strong>
+          <p>
           1. {safe_get(data['captains'], 0)}<br>
           2. {safe_get(data['captains'], 1)}<br>
           3. {safe_get(data['captains'], 2)}
+          </p>
         </div>
 
         <div class="insight-item">
-          <strong>Recommended Buys:</strong><br>
+          <strong>Recommended Buys</strong>
+          <p>
           1. {safe_get(data['buys'], 0)}<br>
           2. {safe_get(data['buys'], 1)}<br>
           3. {safe_get(data['buys'], 2)}
+          </p>
         </div>
 
         <div class="insight-item">
-          <strong>Recommended Sells:</strong><br>
+          <strong>Recommended Sells</strong>
+          <p>
           1. {safe_get(data['sells'], 0)}<br>
           2. {safe_get(data['sells'], 1)}<br>
           3. {safe_get(data['sells'], 2)}
+          </p>
         </div>
       </div>
 
@@ -280,7 +352,7 @@ def get_insights(current_gw):
       <p class="insight-warning">
         The best advice would be to do the opposite of what the great Joey Yakeera suggests.
       </p>
-    </div>
+  </section>
     """
 
 
@@ -291,15 +363,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clash of Captains - FPL Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap');
 
     :root {{
-      --neon-gold: #ffd700;
-      --neon-cyan: #00f5ff;
-      --dark-bg: #05080f;
+      --bg: #070910;
+      --panel: rgba(15, 20, 34, 0.84);
+      --panel-strong: rgba(21, 28, 46, 0.94);
+      --line: rgba(255, 255, 255, 0.12);
+      --gold: #f5c84c;
+      --cyan: #4de1ff;
+      --rose: #ff4f7b;
+      --green: #62e29a;
+      --text: #f5f7fb;
+      --muted: #aeb8c9;
     }}
 
     * {{
@@ -309,338 +387,567 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     body {{
-      font-family: 'Exo 2', sans-serif;
-      background: var(--dark-bg);
-      color: #e0f0ff;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        linear-gradient(140deg, rgba(245,200,76,0.10), transparent 30%),
+        linear-gradient(220deg, rgba(77,225,255,0.10), transparent 34%),
+        var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      position: relative;
-    }}
-
-    body::before,
-    body::after {{
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
+      overflow-x: hidden;
     }}
 
     body::before {{
+      content: '';
+      position: fixed;
+      inset: 0;
       background:
-        radial-gradient(circle at 30% 20%, rgba(255,215,0,0.10), transparent 50%),
-        radial-gradient(circle at 70% 80%, rgba(0,245,255,0.10), transparent 50%);
-      animation: bgPulse 25s infinite alternate;
-    }}
-
-    @keyframes bgPulse {{
-      0% {{ opacity: 0.6; }}
-      100% {{ opacity: 1; }}
-    }}
-
-    body::after {{
-      background:
-        linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      animation: gridMove 60s linear infinite;
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 72%);
+      pointer-events: none;
       z-index: -1;
     }}
 
-    @keyframes gridMove {{
-      0% {{ background-position: 0 0; }}
-      100% {{ background-position: 120px 120px; }}
+    .page-shell {{
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 52px;
+    }}
+
+    .hero {{
+      min-height: 430px;
+      display: block;
+      padding: 36px 0 20px;
+    }}
+
+    .hero-copy,
+    .section-panel,
+    .metric-card,
+    .card {{
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(20,27,45,0.88), rgba(9,12,22,0.92));
+      box-shadow: 0 24px 80px rgba(0,0,0,0.30);
+      backdrop-filter: blur(14px);
+    }}
+
+    .metric-card,
+    .insight-item,
+    .card {{
+      transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
+    }}
+
+    .metric-card:hover,
+    .insight-item:hover,
+    .card:hover {{
+      transform: translateY(-3px) scale(1.01);
+      border-color: rgba(245,200,76,0.42);
+      box-shadow: 0 28px 90px rgba(0,0,0,0.38);
+      background: linear-gradient(145deg, rgba(25,33,55,0.92), rgba(10,14,25,0.96));
+    }}
+
+    .hero-copy {{
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      padding: clamp(28px, 5vw, 54px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 390px;
+    }}
+
+    .hero-copy::after {{
+      content: '';
+      position: absolute;
+      inset: auto 0 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--rose));
+    }}
+
+    .eyebrow,
+    .section-heading span,
+    .metric-label,
+    .status-pill {{
+      color: var(--cyan);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }}
 
     h1 {{
-      text-align: center;
+      max-width: 820px;
+      margin: 18px 0 18px;
       font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.4rem, 8vw, 4.5rem);
+      font-size: clamp(3rem, 8vw, 6.6rem);
+      line-height: 0.92;
       font-weight: 900;
-      letter-spacing: 6px;
-      background: linear-gradient(90deg, #ffd700, #00f5ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 25px 0 8px;
+      letter-spacing: 0;
+      text-transform: uppercase;
     }}
 
-    .subtitle {{
-      text-align: center;
-      color: #00f5ff;
-      font-size: 1.1rem;
-      letter-spacing: 4px;
-      margin-bottom: 15px;
+    .hero-copy p {{
+      max-width: 680px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.65;
     }}
 
-    .gw-highlight {{
-      text-align: center;
-      font-size: clamp(1.8rem, 6vw, 2.8rem);
-      font-weight: 900;
-      background: rgba(5,8,15,0.95);
-      border: 4px solid var(--neon-gold);
-      color: var(--neon-gold);
+    .joey-dunk {{
+      color: var(--rose);
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+
+    .hero-meta {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 34px;
+    }}
+
+    .status-pill {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }}
+
+    .status-pill.live {{
+      color: #071016;
+      background: var(--gold);
+      border-color: transparent;
+    }}
+
+    .summary-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 26px;
+    }}
+
+    .metric-card {{
+      border-radius: 8px;
       padding: 18px;
-      border-radius: 20px;
-      margin: 15px auto;
-      max-width: 720px;
+      min-height: 128px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }}
 
-    .update-time {{
-      max-width: 720px;
-      margin: 0 auto 25px;
-      padding: 0 15px;
+    .metric-card.wide {{
+      grid-column: span 2;
+    }}
+
+    .gw-card strong {{
+      font-family: 'Orbitron', sans-serif;
+      color: var(--gold);
+      font-size: clamp(2.1rem, 4vw, 3.1rem);
+    }}
+
+    .metric-card strong {{
+      display: block;
+      margin: 12px 0 6px;
+      font-size: clamp(1.25rem, 2vw, 1.8rem);
+      line-height: 1.15;
+    }}
+
+    .metric-card small,
+    .card small {{
+      color: var(--muted);
+    }}
+
+    .chip-desk-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 10px;
+    }}
+
+    .chip-desk-pill {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(77,225,255,0.10);
+      color: var(--text);
+      border: 1px solid rgba(77,225,255,0.24);
+      font-size: 0.86rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }}
+
+    .chip-desk-pill.muted {{
+      color: var(--muted);
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+    }}
+
+    .accent-gold {{
+      border-color: rgba(245,200,76,0.42);
+    }}
+
+    .accent-cyan {{
+      border-color: rgba(77,225,255,0.42);
+    }}
+
+    .section-panel {{
+      border-radius: 8px;
+      padding: 24px;
+      margin: 26px 0;
+    }}
+
+    .section-heading {{
+      display: block;
+      margin-bottom: 18px;
       text-align: left;
-      color: #aaa;
-      font-size: 0.9rem;
-      line-height: 1.45;
+    }}
+
+    .section-heading h2 {{
+      font-size: clamp(1.35rem, 3vw, 2.15rem);
+      line-height: 1.1;
+      margin-top: 0;
     }}
 
     .league-table {{
-      max-width: 1100px;
-      margin: 35px auto;
-      background: rgba(15,22,45,0.96);
-      border-radius: 20px;
-      overflow: hidden;
-      border: 4px solid var(--neon-gold);
-      box-shadow: 0 0 70px rgba(255,215,0,0.5);
+      overflow-x: auto;
+      padding: 0;
     }}
 
-    .league-table table {{
+    table {{
       width: 100%;
       border-collapse: collapse;
+      min-width: 820px;
     }}
 
-    .league-table th {{
-      background: rgba(255,215,0,0.25);
-      color: var(--neon-gold);
-      padding: 16px 8px;
-      font-size: 1.05rem;
-      font-weight: 700;
+    th {{
+      padding: 16px 18px;
+      text-align: left;
+      color: var(--gold);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.04);
     }}
 
-    .league-table td {{
-      padding: 14px 8px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      font-size: 0.95rem;
+    td {{
+      padding: 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: #edf2fb;
+      font-size: 0.96rem;
     }}
 
-    .league-table tr.yours td:first-child {{
-      color: #ffd700;
-      font-weight: bold;
+    td.num,
+    th.num {{
+      text-align: right;
     }}
 
-    .insight-box {{
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 28px 26px 24px;
-      background: #10172b;
-      border: 3px solid var(--neon-gold);
-      border-radius: 18px;
-      color: #dce3f0;
-      box-shadow: 0 0 60px rgba(255,215,0,0.35);
+    tr.yours td {{
+      background: rgba(245,200,76,0.07);
     }}
 
-    .insight-box h2 {{
-      margin: 0 0 20px;
-      text-align: center;
-      color: var(--neon-gold);
-      font-size: 1.6rem;
-      font-weight: 900;
+    tbody tr {{
+      transition: background 160ms ease;
     }}
 
-    .insight-grid {{
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
+    tbody tr:hover td {{
+      background: rgba(255,255,255,0.055);
     }}
 
-    .insight-item {{
-      background: #080e1e;
-      border-radius: 10px;
-      padding: 16px 14px;
-      font-size: 1rem;
-      line-height: 1.25;
-      font-weight: 600;
-      color: #dce3f0;
+    tbody tr.yours:hover td {{
+      background: rgba(245,200,76,0.11);
     }}
 
-    .insight-item strong {{
-      color: var(--neon-gold);
-      font-weight: 900;
+    .rank-badge {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(245,200,76,0.14);
+      color: var(--gold);
+      font-weight: 800;
     }}
 
-    .insight-note {{
-      text-align: center;
-      margin: 22px auto 0;
-      font-style: italic;
-      color: #b8b8b8;
-      font-size: 1rem;
+    .chip {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(77,225,255,0.10);
+      color: var(--cyan);
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
     }}
 
-    .insight-warning {{
-      text-align: center;
-      margin: 26px 0 0;
-      color: #ff2d55;
-      font-size: 1.05rem;
-      font-weight: 900;
-    }}
-
-    .history-chart-box {{
-      max-width: 1200px;
-      margin: 40px auto;
-      text-align: center;
-    }}
-
-    .history-chart-box h2 {{
-      color: #ffd700;
-      margin-bottom: 15px;
-      font-family: 'Orbitron', sans-serif;
+    .chip.none {{
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
     }}
 
     .history-chart-box .plotly-graph-div {{
       width: 100% !important;
-      height: 680px !important;
+      height: 660px !important;
       min-height: 0;
-      border-radius: 16px;
-      background: #0a0e17;
+      border-radius: 8px;
+      background: #090d16;
+      overflow: hidden;
+    }}
+
+    .insight-grid,
+    .container {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }}
+
+    .insight-item,
+    .card {{
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.10);
+    }}
+
+    .insight-item strong {{
+      display: block;
+      color: var(--gold);
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }}
+
+    .insight-item p,
+    .insight-note {{
+      color: #d8e0ee;
+      line-height: 1.55;
+    }}
+
+    .insight-note {{
+      margin-top: 18px;
+    }}
+
+    .insight-warning {{
+      margin-top: 16px;
+      color: var(--rose);
+      font-weight: 800;
+    }}
+
+    .transfers-section {{
+      margin-top: 26px;
     }}
 
     .container {{
-      max-width: 1400px;
-      margin: 40px auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px,1fr));
-      gap: 28px;
-      padding: 0 15px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }}
 
-    .card {{
-      background: linear-gradient(145deg, rgba(15,22,45,0.96), rgba(8,12,28,0.98));
-      border-radius: 24px;
-      padding: 26px;
-      border: 2px solid rgba(255,215,0,0.3);
+    .card h2 {{
+      margin-bottom: 18px;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+    }}
+
+    .card h3 {{
+      margin: 18px 0 12px;
+      color: var(--cyan);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }}
 
     .card.yours {{
-      border-color: var(--neon-gold);
+      border-color: rgba(245,200,76,0.48);
     }}
 
     .transfer-list {{
       list-style: none;
       padding: 0;
+      display: grid;
+      gap: 10px;
     }}
 
     .transfer-list li {{
-      background: rgba(0,0,0,0.45);
-      padding: 14px 16px;
-      margin: 10px 0;
-      border-radius: 12px;
-      border-left: 5px solid #ff2d55;
+      background: rgba(0,0,0,0.22);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--rose);
+      line-height: 1.45;
     }}
 
     .transfer-list small {{
-      color: #888;
-      font-size: 0.9rem;
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
     }}
 
     .transfer-out {{
-      color: #ff2d55;
-      font-weight: 700;
+      color: var(--rose);
+      font-weight: 800;
     }}
 
     .transfer-in {{
-      color: #00f5ff;
-      font-weight: 700;
+      color: var(--green);
+      font-weight: 800;
+    }}
+
+    .fade-in {{
+      animation: riseIn 700ms ease both;
+    }}
+
+    @keyframes riseIn {{
+      from {{
+        opacity: 0;
+        transform: translateY(12px);
+      }}
+      to {{
+        opacity: 1;
+        transform: translateY(0);
+      }}
     }}
 
     @media (max-width: 768px) {{
+      .page-shell {{
+        width: min(100% - 20px, 1240px);
+        padding-top: 10px;
+      }}
+
+      .hero {{
+        min-height: auto;
+        padding-top: 12px;
+      }}
+
+      .hero-copy,
+      .section-panel {{
+        padding: 18px;
+      }}
+
+      .hero-copy {{
+        min-height: auto;
+      }}
+
+      .hero-meta {{
+        margin-top: 22px;
+      }}
+
+      .status-pill {{
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+      }}
+
+      .summary-grid,
+      .insight-grid,
       .container {{
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 10px;
       }}
 
-      .league-table th,
-      .league-table td {{
-        padding: 12px 6px;
-        font-size: 0.9rem;
+      .metric-card.wide {{
+        grid-column: auto;
       }}
 
-      h1 {{
-        font-size: 2.4rem;
-      }}
-
-      .gw-highlight {{
-        font-size: 1.8rem;
-        padding: 14px;
-      }}
-
-      .insight-box {{
-        padding: 20px;
-        margin: 25px 10px;
-      }}
-
-      .insight-grid {{
-        grid-template-columns: 1fr;
-      }}
-
-      .history-chart-box {{
-        margin: 25px 10px;
+      .section-heading {{
+        display: block;
       }}
 
       .history-chart-box .plotly-graph-div {{
-        height: 520px !important;
+        height: 500px !important;
       }}
 
-      .update-time {{
-        max-width: 100%;
-        margin-bottom: 18px;
-        font-size: 0.78rem;
+      th,
+      td {{
+        padding: 13px 12px;
+        font-size: 0.86rem;
+      }}
+
+      .metric-card:hover,
+      .insight-item:hover,
+      .card:hover {{
+        transform: none;
       }}
     }}
   </style>
 </head>
 
 <body>
-  <h1>CLASH OF CAPTAINS</h1>
+  <main class="page-shell">
+    <section class="hero fade-in">
+      <div class="hero-copy">
+        <div>
+          <div class="eyebrow">Fantasy Premier League rivalry desk</div>
+          <h1>Clash of Captains</h1>
+          <p>
+            A private war room for the title race • Live standings, pressure points, and weekly swings that decide bragging rights.
+            <span class="joey-dunk">(Joey is currently losing, like always)</span>
+          </p>
+        </div>
 
-  <div class="subtitle">FPL League Dashboard • Zee, Sam & Joey</div>
+        <div class="hero-meta">
+          <span class="status-pill live">Gameweek {gw}</span>
+          <span class="status-pill">Last scanned: {timestamp}</span>
+          <span class="status-pill">Updates 9 AM & 9 PM Eastern</span>
+          <span class="status-pill">Manual refresh by WhatsApp request</span>
+        </div>
+      </div>
+    </section>
 
-  <div class="gw-highlight">GAMEWEEK {gw}</div>
+    {summary_html}
 
-  <div class="update-time">
-    Last scanned: {timestamp}<br>
-    <span>
-      updated twice daily at 9 AM and 9 PM<br>
-      and manual updates thru whatsapp requests
-    </span>
-  </div>
+    <section class="section-panel league-table">
+      <div class="section-heading">
+        <h2>Current standings</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Team</th>
+            <th>Manager</th>
+            <th class="num">Total</th>
+            <th class="num">GW</th>
+            <th class="num">Gap</th>
+            <th class="num">Live Rank</th>
+            <th>Chip</th>
+          </tr>
+        </thead>
+        <tbody>{standings_html}</tbody>
+      </table>
+    </section>
 
-  <div class="league-table">
-    <table>
-      <thead>
-        <tr>
-          <th>Pos</th>
-          <th>Team</th>
-          <th>Manager</th>
-          <th>Total</th>
-          <th>GW Points</th>
-          <th>Live Rank</th>
-          <th>Chip</th>
-        </tr>
-      </thead>
-      <tbody>{standings_html}</tbody>
-    </table>
-  </div>
+    <section class="section-panel history-chart-box">
+      <div class="section-heading">
+        <h2>Historical rank progress</h2>
+      </div>
+      {history_chart_html}
+    </section>
 
-  {insight_html}
+    {insight_html}
 
-  <div class="history-chart-box">
-    <h2>Historical Rank Progress</h2>
-    {history_chart_html}
-  </div>
+    <section class="transfers-section">
+      <div class="section-heading">
+        <span>Transfer Wire</span>
+        <h2>Gameweek movement</h2>
+      </div>
+      <div class="container">
+        {cards}
+      </div>
+    </section>
+  </main>
 
   <script>
     function tuneHistoryChart() {{
@@ -657,10 +964,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }});
 
       Plotly.relayout(chart, {{
-        height: mobile ? 520 : 680,
+        height: mobile ? 500 : 660,
         margin: mobile
-          ? {{ l: 48, r: 8, t: 46, b: 48 }}
-          : {{ l: 70, r: 20, t: 70, b: 60 }},
+          ? {{ l: 44, r: 8, t: 34, b: 46 }}
+          : {{ l: 70, r: 20, t: 34, b: 60 }},
         font: {{ size: mobile ? 10 : 12 }},
         "title.font.size": mobile ? 13 : 18,
         "legend.orientation": mobile ? "h" : "v",
@@ -677,10 +984,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     window.addEventListener("load", tuneHistoryChart);
     window.addEventListener("resize", tuneHistoryChart);
   </script>
-
-  <div class="container">
-    {cards}
-  </div>
 </body>
 </html>"""
 
@@ -688,11 +991,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 # ====================== CARD TEMPLATE ======================
 CARD_TEMPLATE = """
 <div class="card {yours_class}">
-  <h2 style="font-family:Orbitron; letter-spacing:2px; margin-bottom:20px;">
+  <h2>
     {team} <small style="color:#888;">({manager})</small>
   </h2>
 
-  <h3 style="color:#00f5ff; margin:20px 0 12px;">TRANSFERS THIS GW</h3>
+  <h3>Transfers this GW</h3>
   {transfers_html}
 </div>
 """
@@ -776,31 +1079,32 @@ def generate_html(gw, players, history_chart_html):
     standings.sort(key=lambda x: x["total"], reverse=True)
 
     standings_html = ""
+    leader_total = standings[0]["total"] if standings else 0
 
     for i, s in enumerate(standings, 1):
         row_class = ' class="yours"' if s["yours"] else ""
-
-        try:
-            formatted_rank = f"#{int(s['rank']):,}"
-        except Exception:
-            formatted_rank = f"#{s['rank']}"
+        gap = leader_total - s["total"]
+        gap_label = "Leader" if gap == 0 else f"-{gap}"
+        chip_class = "chip none" if s["chip"] == "None" else "chip"
 
         standings_html += f"""
         <tr{row_class}>
-          <td><strong>#{i}</strong></td>
+          <td><span class="rank-badge">#{i}</span></td>
           <td>{s['emoji']} {s['team']}</td>
           <td>{s['manager']}</td>
-          <td><strong>{s['total']}</strong></td>
-          <td>{s['gw']}</td>
-          <td>{formatted_rank}</td>
-          <td>{s['chip']}</td>
+          <td class="num"><strong>{format_number(s['total'])}</strong></td>
+          <td class="num">{s['gw']}</td>
+          <td class="num">{gap_label}</td>
+          <td class="num">{format_rank(s['rank'])}</td>
+          <td><span class="{chip_class}">{s['chip']}</span></td>
         </tr>"""
 
     insight_html = get_insights(gw)
-
+    summary_html = build_summary_html(standings, gw)
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
+        summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
         insight_html=insight_html,
@@ -810,7 +1114,7 @@ def generate_html(gw, players, history_chart_html):
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(full_html)
 
-    print(f"\n✅ Dashboard updated successfully → {OUTPUT_FILE}")
+    print(f"\nDashboard updated successfully: {OUTPUT_FILE}")
 
 
 # ====================== MAIN ======================
@@ -820,7 +1124,7 @@ if __name__ == "__main__":
     try:
         gw, players = get_bootstrap_data()
 
-        print(f"→ Gameweek: {gw}")
+        print(f"Gameweek: {gw}")
 
         history_chart_html = generate_history_chart()
         generate_html(gw, players, history_chart_html)
