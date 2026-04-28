@@ -1,7 +1,6 @@
 import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import os
 import plotly.graph_objects as go
 
 # CONFIG
@@ -12,21 +11,25 @@ MANAGERS = {
 }
 
 OUTPUT_FILE = "index.html"
-HISTORY_CHART_FILE = "history_chart.html"
+
 
 # ====================== DATA FETCHING ======================
 def get_bootstrap_data():
     url = "https://fantasy.premierleague.com/api/bootstrap-static/"
+
     try:
         data = requests.get(url, timeout=10).json()
-        events = data.get('events', [])
-        current_gw = next((e['id'] for e in events if e.get('is_current')), None)
+        events = data.get("events", [])
+        current_gw = next((e["id"] for e in events if e.get("is_current")), None)
 
         if current_gw is None:
-            processed = [e['id'] for e in events if e.get('data_checked') or e.get('finished')]
-            current_gw = max(processed) if processed else events[-1]['id']
+            processed = [
+                e["id"] for e in events
+                if e.get("data_checked") or e.get("finished")
+            ]
+            current_gw = max(processed) if processed else events[-1]["id"]
 
-        players = {p['id']: p['web_name'] for p in data.get('elements', [])}
+        players = {p["id"]: p["web_name"] for p in data.get("elements", [])}
 
         print(f"Debug: GW {current_gw} detected")
         return current_gw, players
@@ -43,11 +46,11 @@ def get_manager_summary(entry_id):
         ).json()
 
         return (
-            data.get('summary_overall_points', 0),
-            data.get('summary_overall_rank', 'N/A')
+            data.get("summary_overall_points", 0),
+            data.get("summary_overall_rank", "N/A")
         )
-    except:
-        return 0, 'N/A'
+    except Exception:
+        return 0, "N/A"
 
 
 def get_picks(entry_id, gw):
@@ -57,12 +60,13 @@ def get_picks(entry_id, gw):
             timeout=8
         ).json()
 
-        points = data.get('entry_history', {}).get('points', 0)
-        chip = data.get('active_chip') or 'None'
+        points = data.get("entry_history", {}).get("points", 0)
+        chip = data.get("active_chip") or "None"
 
         return points, chip
-    except:
-        return 0, 'None'
+
+    except Exception:
+        return 0, "None"
 
 
 def get_transfers(entry_id, gw):
@@ -76,11 +80,12 @@ def get_transfers(entry_id, gw):
             data = requests.get(url, timeout=8).json()
 
             if isinstance(data, list):
-                if 'transfers-latest' in url and data:
+                if "transfers-latest" in url and data:
                     return data
 
-                return [t for t in data if t.get('event') == gw]
-        except:
+                return [t for t in data if t.get("event") == gw]
+
+        except Exception:
             pass
 
     return []
@@ -104,21 +109,22 @@ def generate_history_chart():
 
                 if resp.status_code == 200:
                     data = resp.json()
-                    history = data.get('entry_history', {})
+                    history = data.get("entry_history", {})
 
-                    overall_rank = history.get('overall_rank')
+                    overall_rank = history.get("overall_rank")
 
                     if overall_rank is not None:
                         gws.append(gw)
                         overall_ranks.append(int(overall_rank))
-            except:
+
+            except Exception:
                 pass
 
         if gws:
             fig.add_trace(go.Scatter(
                 x=gws,
                 y=overall_ranks,
-                mode='lines+markers',
+                mode="lines+markers",
                 name=f"{info['team']} ({info['name']})",
                 line=dict(width=4),
                 marker=dict(size=8)
@@ -130,29 +136,48 @@ def generate_history_chart():
 
     if len(fig.data) > 0:
         fig.update_layout(
-            title="Clash of Captains - Historical Overall Rank Progress",
+            title="Clash of Captains - Historical Overall Rank Progress 25/26 season",
             xaxis_title="Gameweek",
-            yaxis_title="Overall Rank (Lower = Better)",
+            yaxis_title="Overall Rank",
             template="plotly_dark",
             height=750,
-            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-            yaxis=dict(autorange="reversed", tickformat=","),
-            xaxis=dict(tickmode='linear', dtick=1, range=[1, 38])
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01
+            ),
+            yaxis=dict(
+                autorange="reversed",
+                tickformat=","
+            ),
+            xaxis=dict(
+                tickmode="linear",
+                dtick=1,
+                range=[1, 38]
+            )
         )
 
-        fig.write_html(HISTORY_CHART_FILE, include_plotlyjs='cdn')
-
         print("\n✅ History chart created successfully!")
-        print(f"Open: {os.path.abspath(HISTORY_CHART_FILE)}")
-    else:
-        print("No history data loaded.")
+
+        return fig.to_html(
+            full_html=False,
+            include_plotlyjs="cdn",
+            config={
+                "responsive": True,
+                "displayModeBar": False
+            }
+        )
+
+    print("No history data loaded.")
+    return '<p style="color:#888;">No history data loaded.</p>'
 
 
 # ====================== INSIGHTS ======================
 def safe_get(items, index, fallback=""):
     try:
         return items[index]
-    except:
+    except Exception:
         return fallback
 
 
@@ -162,30 +187,65 @@ def get_insights(current_gw):
     insights = {
         34: {
             "title": "GW34 INSIGHT (Blank Gameweek)",
-            "captains": ["Bruno Fernandes (MUN)", "Alexander Isak (NEW)", "Mohamed Salah (LIV)"],
-            "buys": ["Bruno Fernandes", "Alexander Isak", "Matheus Cunha"],
-            "sells": ["Arsenal assets", "Chelsea assets", "Man City assets"],
+            "captains": [
+                "Bruno Fernandes (MUN)",
+                "Alexander Isak (NEW)",
+                "Mohamed Salah (LIV)"
+            ],
+            "buys": [
+                "Bruno Fernandes",
+                "Alexander Isak",
+                "Matheus Cunha"
+            ],
+            "sells": [
+                "Arsenal assets",
+                "Chelsea assets",
+                "Man City assets"
+            ],
             "note": "This is a Blank Gameweek for several big teams. Free Hit is very popular."
         },
         35: {
             "title": "GW35 INSIGHT (Title Race Heat)",
-            "captains": ["Erling Haaland (MCI)", "Mohamed Salah (LIV)", "Bruno Fernandes (MUN)"],
-            "buys": ["Gabriel (ARS)", "Matheus Cunha (MUN)", "Morgan Gibbs-White (NFO)"],
-            "sells": ["Ollie Watkins", "Ivan Toney", "Man Utd Defenders"],
+            "captains": [
+                "Erling Haaland (MCI)",
+                "Mohamed Salah (LIV)",
+                "Bruno Fernandes (MUN)"
+            ],
+            "buys": [
+                "Gabriel (ARS)",
+                "Matheus Cunha (MUN)",
+                "Morgan Gibbs-White (NFO)"
+            ],
+            "sells": [
+                "Ollie Watkins",
+                "Ivan Toney",
+                "Man Utd Defenders"
+            ],
             "note": "Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint."
         }
     }
 
     data = insights.get(next_gw, {
         "title": f"GW{next_gw} INSIGHT",
-        "captains": ["Mohamed Salah", "Erling Haaland", "Bruno Fernandes"],
-        "buys": ["Hot form players", "Good fixture picks", "Reliable starters"],
-        "sells": ["Underperforming assets", "Rotation risks", "Poor fixture players"],
+        "captains": [
+            "Mohamed Salah",
+            "Erling Haaland",
+            "Bruno Fernandes"
+        ],
+        "buys": [
+            "Hot form players",
+            "Good fixture picks",
+            "Reliable starters"
+        ],
+        "sells": [
+            "Underperforming assets",
+            "Rotation risks",
+            "Poor fixture players"
+        ],
         "note": "Focus on good fixtures, nailed starters, and players with strong form."
     })
 
     return f"""
-    <!-- GW Insight -->
     <div class="insight-box">
       <h2>🔥 {data['title']}</h2>
 
@@ -434,10 +494,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-family: 'Orbitron', sans-serif;
     }}
 
-    .history-chart-box iframe {{
-      width: 100%;
-      height: 750px;
-      border: none;
+    .history-chart-box .plotly-graph-div {{
+      width: 100% !important;
+      min-height: 750px;
       border-radius: 16px;
       background: #0a0e17;
     }}
@@ -525,8 +584,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         margin: 25px 10px;
       }}
 
-      .history-chart-box iframe {{
-        height: 550px;
+      .history-chart-box .plotly-graph-div {{
+        min-height: 550px;
       }}
     }}
   </style>
@@ -568,7 +627,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   <div class="history-chart-box">
     <h2>Historical Rank Progress</h2>
-    <iframe src="history_chart.html"></iframe>
+    {history_chart_html}
   </div>
 
   <div class="container">
@@ -592,7 +651,7 @@ CARD_TEMPLATE = """
 
 
 # ====================== HTML GENERATION ======================
-def generate_html(gw, players):
+def generate_html(gw, players, history_chart_html):
     cards = []
     standings = []
 
@@ -607,14 +666,14 @@ def generate_html(gw, players):
         trans_lines = []
 
         for t in transfers:
-            in_id = t.get('element_in')
-            out_id = t.get('element_out')
+            in_id = t.get("element_in")
+            out_id = t.get("element_out")
 
-            in_name = players.get(in_id, 'Unknown')
-            out_name = players.get(out_id, 'Unknown')
+            in_name = players.get(in_id, "Unknown")
+            out_name = players.get(out_id, "Unknown")
 
-            raw_time = t.get('time', '')
-            clean_time = raw_time[:16].replace('T', ' ') if raw_time else 'N/A'
+            raw_time = t.get("time", "")
+            clean_time = raw_time[:16].replace("T", " ") if raw_time else "N/A"
 
             trans_lines.append(
                 f"<li><span class='transfer-out'>{out_name}</span> ↔ "
@@ -623,15 +682,15 @@ def generate_html(gw, players):
             )
 
         transfers_html = (
-            '<ul class="transfer-list">' + ''.join(trans_lines) + '</ul>'
+            '<ul class="transfer-list">' + "".join(trans_lines) + "</ul>"
             if trans_lines
             else '<p style="color:#888;">No transfers this GW</p>'
         )
 
         cards.append(CARD_TEMPLATE.format(
-            yours_class="yours" if info['yours'] else "",
-            team=info['team'],
-            manager=info['name'],
+            yours_class="yours" if info["yours"] else "",
+            team=info["team"],
+            manager=info["name"],
             transfers_html=transfers_html
         ))
 
@@ -641,41 +700,41 @@ def generate_html(gw, players):
             "BAKHAAT": "💩"
         }
 
-        team_emoji = emojis.get(info['team'], "⚽")
+        team_emoji = emojis.get(info["team"], "⚽")
 
         display_chip = "None"
 
-        if chip and str(chip).lower() != 'none':
+        if chip and str(chip).lower() != "none":
             chip_map = {
-                'wildcard': 'WILDCARD',
-                'freehit': 'FREE HIT',
-                'bboost': 'BENCH BOOST',
-                '3xc': 'TRIPLE CAPTAIN'
+                "wildcard": "WILDCARD",
+                "freehit": "FREE HIT",
+                "bboost": "BENCH BOOST",
+                "3xc": "TRIPLE CAPTAIN"
             }
 
             display_chip = chip_map.get(str(chip).lower(), str(chip).upper())
 
         standings.append({
-            'team': info['team'],
-            'emoji': team_emoji,
-            'manager': info['name'],
-            'total': total_points,
-            'gw': points,
-            'rank': live_rank,
-            'chip': display_chip,
-            'yours': info['yours']
+            "team": info["team"],
+            "emoji": team_emoji,
+            "manager": info["name"],
+            "total": total_points,
+            "gw": points,
+            "rank": live_rank,
+            "chip": display_chip,
+            "yours": info["yours"]
         })
 
-    standings.sort(key=lambda x: x['total'], reverse=True)
+    standings.sort(key=lambda x: x["total"], reverse=True)
 
     standings_html = ""
 
     for i, s in enumerate(standings, 1):
-        row_class = ' class="yours"' if s['yours'] else ''
+        row_class = ' class="yours"' if s["yours"] else ""
 
         try:
             formatted_rank = f"#{int(s['rank']):,}"
-        except:
+        except Exception:
             formatted_rank = f"#{s['rank']}"
 
         standings_html += f"""
@@ -694,12 +753,13 @@ def generate_html(gw, players):
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
-        cards='\n'.join(cards),
+        cards="\n".join(cards),
         standings_html=standings_html,
-        insight_html=insight_html
+        insight_html=insight_html,
+        history_chart_html=history_chart_html
     )
 
-    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(full_html)
 
     print(f"\n✅ Dashboard updated successfully → {OUTPUT_FILE}")
@@ -714,8 +774,8 @@ if __name__ == "__main__":
 
         print(f"→ Gameweek: {gw}")
 
-        generate_history_chart()
-        generate_html(gw, players)
+        history_chart_html = generate_history_chart()
+        generate_html(gw, players, history_chart_html)
 
     except Exception as e:
         print(f"Error: {e}")
