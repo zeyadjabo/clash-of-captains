@@ -286,8 +286,27 @@ def get_insights(current_gw):
                 "Man Utd Defenders"
             ],
             "note": "Focus on Arsenal and City assets for the title run-in, while Bruno Fernandes and Gibbs-White offer the best form for the final sprint."
+        },
+        36: {
+        "title": "GW36 INSIGHT (The Double Down)",
+        "captains": [
+            "Erling Haaland (MCI)",
+            "Phil Foden (MCI)",
+            "Ismaïla Sarr (CRY)"
+        ],
+        "buys": [
+            "Ismaïla Sarr (CRY)",
+            "Josko Gvardiol (MCI)",
+            "Dominic Calvert-Lewin (LEE)"
+        ],
+        "sells": [
+            "Ollie Watkins (AVL)",
+            "Cole Palmer (CHE)",
+            "Newcastle Defenders"
+        ],
+        "note": "GW36 is a Double Gameweek for Manchester City and Crystal Palace. Triple-up on City assets is mandatory for the title charge, while Palace doublers like Sarr and Lacroix offer the best differential value. Sell Watkins and Palmer to fund these moves, as their single-fixture ceilings are lower than the doublers."
         }
-    }
+      }
 
     data = insights.get(next_gw, {
         "title": f"GW{next_gw} INSIGHT",
