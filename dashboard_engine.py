@@ -305,6 +305,25 @@ def get_insights(current_gw):
             "Newcastle Defenders"
         ],
         "note": "GW36 is a Double Gameweek for Manchester City and Crystal Palace. Triple-up on City assets is mandatory for the title charge, while Palace doublers like Sarr and Lacroix offer the best differential value. Sell Watkins and Palmer to fund these moves, as their single-fixture ceilings are lower than the doublers."
+        },
+        37: {
+        "title": "GW37 INSIGHT (Penultimate Push)",
+        "captains": [
+            "Bukayo Saka (ARS)",
+            "Bruno Fernandes (MUN)",
+            "Erling Haaland (MCI)"
+        ],
+        "buys": [
+            "Viktor Gyokeres (ARS)",
+            "Gabriel Magalhães (ARS)",
+            "Igor Thiago (BRE)"
+        ],
+        "sells": [
+            "Cole Palmer (CHE)",
+            "Ollie Watkins (AVL)",
+            "Crystal Palace assets"
+        ],
+        "note": "GW37 is a big single gameweek with several favourable fixtures. Arsenal at home to Burnley is the standout, so loading up on Bottlers attackers and defenders is key. Bruno has a great home fixture vs Nottingham Forest. Haaland remains the safe premium option. Sell players with tougher fixtures or rotation risks as we head into the final week."
         }
       }
 
