@@ -2,8 +2,8 @@ name: Update FPL Dashboard
 
 on:
   schedule:
-    - cron: '0 14 * * *'    # Every day at 2:00 PM UTC (9 AM Eastern)
-    - cron: '0 2 * * *'     # Every day at 2:00 AM UTC (9 PM Eastern)
+    - cron: '0 13 * * *'    # (9 AM Eastern)
+    - cron: '0 1 * * *'     # (9 PM Eastern)
   workflow_dispatch:        # Allows you to run manually
 
 jobs:
