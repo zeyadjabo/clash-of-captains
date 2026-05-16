@@ -324,7 +324,26 @@ def get_insights(current_gw):
             "Crystal Palace assets"
         ],
         "note": "GW37 is a big single gameweek with several favourable fixtures. Arsenal at home to Burnley is the standout, so loading up on Bottlers attackers and defenders is key. Bruno has a great home fixture vs Nottingham Forest. Haaland remains the safe premium option. Sell players with tougher fixtures or rotation risks as we head into the final week."
-        }
+        },
+        38: {
+        "title": "GW38 INSIGHT (The Grand Finale)",
+        "captains": [
+            "Erling Haaland (MCI)",
+            "Viktor Gyokeres (ARS)",
+            "Jarrod Bowen (WHU)"
+        ],
+        "buys": [
+            "Jarrod Bowen (WHU)",
+            "Kiernan Dewsbury-Hall (EVE)",
+            "Pedro Porro (TOT)"
+        ],
+        "sells": [
+            "Bournemouth assets",
+            "Burnley assets",
+            "Sunderland assets"
+        ],
+        "note": "GW38 is historically a high-scoring curtain-closer where chasing upside is the priority. Manchester City host Aston Villa in a massive final-day fixture, keeping Haaland as the premier captaincy shield. Arsenal travel to Crystal Palace, who have a European final just three days later—making Gyokeres and Saka prime targets for heavy investment. For mini-league differentials, look to West Ham at home to Leeds (Bowen), an in-form Everton pushing for Europe (Dewsbury-Hall), or Spurs fighting for position against Everton (Porro). Clear out players with nothing left to play for or brutal final-day fixtures."
+        }        
       }
 
     data = insights.get(next_gw, {
