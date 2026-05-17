@@ -6,6 +6,10 @@ on:
     - cron: '0 1 * * *'     # (9 PM Eastern)
   workflow_dispatch:        # Allows you to run manually
 
+concurrency:
+  group: update-dashboard-main
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -14,15 +18,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: main
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt
 
       - name: Run Dashboard Script
         run: python dashboard_engine.py
@@ -36,5 +42,6 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Dashboard auto-updated"
+            git pull --rebase origin main
             git push
           fi
