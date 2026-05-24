@@ -245,7 +245,67 @@ def build_summary_html(standings, gw):
 """
 
 
+def build_celebration_html(standings):
+    yours = next((s for s in standings if s["yours"]), None)
+
+    if not yours:
+        return ""
+
+    confetti = "".join(
+        f'<i style="left:{(i * 7) % 100}%; animation-delay:{(i % 12) * 0.13:.2f}s; animation-duration:{2.0 + (i % 5) * 0.22:.2f}s;"></i>'
+        for i in range(36)
+    )
+
+    return f"""
+  <div class="celebration-overlay" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+    <div class="celebration-card">
+      <div class="confetti" aria-hidden="true">{confetti}</div>
+      <button class="celebration-close" type="button" aria-label="Close celebration" onclick="closeCelebration()">×</button>
+      <div class="celebration-kicker">2025/2026 Season Champion</div>
+      <div class="celebration-name" id="celebration-title">{yours['manager']}</div>
+      <div class="celebration-score">{format_number(yours['total'])} pts</div>
+      <p class="celebration-note">{yours['team']} finished the campaign on top. The dashboard will be here when the confetti clears.</p>
+    </div>
+  </div>
+"""
+
+
 def get_insights(current_gw):
+    if current_gw >= 38:
+        return """
+  <section class="section-panel insight-box">
+    <div class="section-heading">
+      <h2>SEASON CONCLUSION</h2>
+    </div>
+
+      <div class="insight-grid season-conclusion-grid">
+        <div class="insight-item">
+          <strong>Final Whistle</strong>
+          <p>
+          No more Gameweeks. No more excuses. The spreadsheets and data analytics are retired, the season is officially dead, and I’m sitting on top collecting my bragging rights like rent.<br><br>
+          Sam went full “ya basha” mode again, consulting every Egyptian YouTuber known to man, but even the Pharaohs curse couldn’t save him for the second year in a row. Meanwhile Joey’s still stuck in the stone age, resisting AI and advanced data like it’s the plague and cheering for Sam to win instead of putting in the work himself for the third year running. Absolute disaster.<br><br>
+          Season closed. My league title is secured. Rivalries remain open. Thanks for watching.
+          </p>
+        </div>
+
+        <div class="insight-item">
+          <strong>Season Verdict</strong>
+          <p>
+          Credit where it’s due: Sam turned up the intensity in the final leg and made it fun to play. But Joey? Man’s been providing elite motivation all season and nothing gets me going like the desire to squash him like a bug. Receipts are being filed and screenshotted for group chat use all summer.
+          </p>
+        </div>
+      </div>
+
+      <p class="insight-note">
+        Season closed. Rivalries remain open.
+      </p>
+
+      <p class="insight-warning">
+        The best advice remains unchanged: do the opposite of what the great Joey Yakeera suggests. Not only in FPL but in life in general. FFS, the guy lives in California, that tells you a lot lol.
+      </p>
+  </section>
+        """
+
     next_gw = current_gw + 1
 
     insights = {
@@ -772,6 +832,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       gap: 14px;
     }}
 
+    .season-conclusion-grid {{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }}
+
     .insight-item,
     .card {{
       border-radius: 8px;
@@ -863,6 +927,121 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-weight: 800;
     }}
 
+    .celebration-overlay {{
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(245,200,76,0.18), transparent 34%),
+        rgba(3, 6, 12, 0.88);
+      backdrop-filter: blur(12px);
+    }}
+
+    .celebration-overlay.hidden {{
+      display: none;
+    }}
+
+    .celebration-card {{
+      position: relative;
+      width: min(560px, 100%);
+      overflow: hidden;
+      border: 1px solid rgba(245,200,76,0.50);
+      border-radius: 10px;
+      padding: 34px;
+      background: linear-gradient(145deg, rgba(22,30,50,0.96), rgba(8,12,22,0.98));
+      box-shadow: 0 34px 110px rgba(0,0,0,0.55);
+      text-align: center;
+    }}
+
+    .celebration-close {{
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+    }}
+
+    .celebration-kicker {{
+      color: var(--cyan);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }}
+
+    .celebration-name {{
+      margin: 16px 0 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 5.8rem);
+      line-height: 0.95;
+      color: var(--gold);
+      text-transform: uppercase;
+    }}
+
+    .celebration-score {{
+      font-size: clamp(1.7rem, 5vw, 3rem);
+      font-weight: 900;
+    }}
+
+    .celebration-note {{
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.55;
+    }}
+
+    .confetti {{
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }}
+
+    .confetti i {{
+      position: absolute;
+      top: -18px;
+      width: 8px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--gold);
+      animation: confettiFall 2400ms linear infinite;
+    }}
+
+    .confetti i:nth-child(3n) {{
+      background: var(--cyan);
+    }}
+
+    .confetti i:nth-child(4n) {{
+      background: var(--rose);
+    }}
+
+    .confetti i:nth-child(5n) {{
+      background: var(--green);
+    }}
+
+    @keyframes confettiFall {{
+      0% {{
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+      }}
+      12% {{
+        opacity: 1;
+      }}
+      100% {{
+        transform: translateY(620px) rotate(540deg);
+        opacity: 0;
+      }}
+    }}
+
     .fade-in {{
       animation: riseIn 700ms ease both;
     }}
@@ -942,6 +1121,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 
 <body>
+  {celebration_html}
+
   <main class="page-shell">
     <section class="hero fade-in">
       <div class="hero-copy">
@@ -1007,6 +1188,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </main>
 
   <script>
+    function closeCelebration() {{
+      var overlay = document.querySelector(".celebration-overlay");
+      if (overlay) overlay.classList.add("hidden");
+    }}
+
+    window.addEventListener("keydown", function(event) {{
+      if (event.key === "Escape") closeCelebration();
+    }});
+
     function tuneHistoryChart() {{
       if (!window.Plotly) return;
 
@@ -1158,9 +1348,11 @@ def generate_html(gw, players, history_chart_html):
 
     insight_html = get_insights(gw)
     summary_html = build_summary_html(standings, gw)
+    celebration_html = build_celebration_html(standings)
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
+        celebration_html=celebration_html,
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
