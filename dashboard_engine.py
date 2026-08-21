@@ -11,6 +11,13 @@ MANAGERS = {
 }
 
 OUTPUT_FILE = "index.html"
+ACTIVE_SEASON = "2026/2027"
+PREVIOUS_CHAMPION = {
+    "season": "2025/2026",
+    "manager": "Zee",
+    "team": "Sesko n Destroy",
+    "points": 2223
+}
 
 
 # ====================== DATA FETCHING ======================
@@ -171,7 +178,7 @@ def generate_history_chart():
         )
 
     print("No history data loaded.")
-    return '<p style="color:#888;">No history data loaded.</p>'
+    return '<p class="empty-chart-note">Rank history starts once GW1 data is fully processed.</p>'
 
 
 # ====================== INSIGHTS ======================
@@ -215,7 +222,13 @@ def build_summary_html(standings, gw):
     <article class="metric-card gw-card">
       <span class="metric-label">Live Race</span>
       <strong>GW{gw}</strong>
-      <small>Season 25/26</small>
+      <small>Season {ACTIVE_SEASON}</small>
+    </article>
+
+    <article class="metric-card previous-champion-card">
+      <span class="metric-label">{PREVIOUS_CHAMPION['season']} Champion</span>
+      <strong>{PREVIOUS_CHAMPION['manager']}</strong>
+      <small>{PREVIOUS_CHAMPION['team']} • {format_number(PREVIOUS_CHAMPION['points'])} pts</small>
     </article>
 
     <article class="metric-card accent-gold">
@@ -242,31 +255,6 @@ def build_summary_html(standings, gw):
       <small>Current gameweek activity</small>
     </article>
   </section>
-"""
-
-
-def build_celebration_html(standings):
-    yours = next((s for s in standings if s["yours"]), None)
-
-    if not yours:
-        return ""
-
-    confetti = "".join(
-        f'<i style="left:{(i * 7) % 100}%; animation-delay:{(i % 12) * 0.13:.2f}s; animation-duration:{2.0 + (i % 5) * 0.22:.2f}s;"></i>'
-        for i in range(36)
-    )
-
-    return f"""
-  <div class="celebration-overlay" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
-    <div class="celebration-card">
-      <div class="confetti" aria-hidden="true">{confetti}</div>
-      <button class="celebration-close" type="button" aria-label="Close celebration" onclick="closeCelebration()">×</button>
-      <div class="celebration-kicker">2025/2026 Season Champion</div>
-      <div class="celebration-name" id="celebration-title">{yours['manager']}</div>
-      <div class="celebration-score">{format_number(yours['total'])} pts</div>
-      <p class="celebration-note">{yours['team']} finished the campaign on top. The dashboard will be here when the confetti clears.</p>
-    </div>
-  </div>
 """
 
 
@@ -309,6 +297,25 @@ def get_insights(current_gw):
     next_gw = current_gw + 1
 
     insights = {
+        2: {
+            "title": "GW2 INSIGHT (Opening Moves)",
+            "captains": [
+                "Early form premiums",
+                "Reliable home-fixture stars",
+                "Penalty takers with strong minutes"
+            ],
+            "buys": [
+                "Nailed starters",
+                "Emerging bandwagons",
+                "Underpriced attackers"
+            ],
+            "sells": [
+                "Minutes risks",
+                "One-week punts",
+                "Players already testing patience"
+            ],
+            "note": "The first week is information, not a full personality change. Back the strong minutes, watch the price moves, and remember that Joey panicking early is usually the market signal we all needed."
+        },
         34: {
             "title": "GW34 INSIGHT (Blank Gameweek)",
             "captains": [
@@ -719,6 +726,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-color: rgba(77,225,255,0.42);
     }}
 
+    .previous-champion-card {{
+      border-color: rgba(245,200,76,0.30);
+      background: linear-gradient(145deg, rgba(35,28,15,0.78), rgba(10,14,25,0.94));
+    }}
+
     .section-panel {{
       border-radius: 8px;
       padding: 24px;
@@ -825,6 +837,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       overflow: hidden;
     }}
 
+    .empty-chart-note {{
+      color: var(--muted);
+      padding: 36px 18px;
+      border: 1px dashed rgba(255,255,255,0.16);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.035);
+      text-align: center;
+    }}
+
     .insight-grid,
     .container {{
       display: grid;
@@ -927,121 +948,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-weight: 800;
     }}
 
-    .celebration-overlay {{
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background:
-        radial-gradient(circle at 50% 30%, rgba(245,200,76,0.18), transparent 34%),
-        rgba(3, 6, 12, 0.88);
-      backdrop-filter: blur(12px);
-    }}
-
-    .celebration-overlay.hidden {{
-      display: none;
-    }}
-
-    .celebration-card {{
-      position: relative;
-      width: min(560px, 100%);
-      overflow: hidden;
-      border: 1px solid rgba(245,200,76,0.50);
-      border-radius: 10px;
-      padding: 34px;
-      background: linear-gradient(145deg, rgba(22,30,50,0.96), rgba(8,12,22,0.98));
-      box-shadow: 0 34px 110px rgba(0,0,0,0.55);
-      text-align: center;
-    }}
-
-    .celebration-close {{
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 34px;
-      height: 34px;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      font-size: 1.15rem;
-      font-weight: 800;
-      cursor: pointer;
-    }}
-
-    .celebration-kicker {{
-      color: var(--cyan);
-      font-size: 0.72rem;
-      font-weight: 900;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }}
-
-    .celebration-name {{
-      margin: 16px 0 8px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.8rem, 10vw, 5.8rem);
-      line-height: 0.95;
-      color: var(--gold);
-      text-transform: uppercase;
-    }}
-
-    .celebration-score {{
-      font-size: clamp(1.7rem, 5vw, 3rem);
-      font-weight: 900;
-    }}
-
-    .celebration-note {{
-      margin-top: 14px;
-      color: var(--muted);
-      line-height: 1.55;
-    }}
-
-    .confetti {{
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }}
-
-    .confetti i {{
-      position: absolute;
-      top: -18px;
-      width: 8px;
-      height: 14px;
-      border-radius: 2px;
-      background: var(--gold);
-      animation: confettiFall 2400ms linear infinite;
-    }}
-
-    .confetti i:nth-child(3n) {{
-      background: var(--cyan);
-    }}
-
-    .confetti i:nth-child(4n) {{
-      background: var(--rose);
-    }}
-
-    .confetti i:nth-child(5n) {{
-      background: var(--green);
-    }}
-
-    @keyframes confettiFall {{
-      0% {{
-        transform: translateY(-20px) rotate(0deg);
-        opacity: 0;
-      }}
-      12% {{
-        opacity: 1;
-      }}
-      100% {{
-        transform: translateY(620px) rotate(540deg);
-        opacity: 0;
-      }}
-    }}
-
     .fade-in {{
       animation: riseIn 700ms ease both;
     }}
@@ -1121,8 +1027,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 
 <body>
-  {celebration_html}
-
   <main class="page-shell">
     <section class="hero fade-in">
       <div class="hero-copy">
@@ -1131,7 +1035,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <h1>Clash of Captains</h1>
           <p>
             A private war room for the title race • Live standings, pressure points, and weekly swings that decide bragging rights.
-            <span class="joey-dunk">(Joey is currently losing, like always)</span>
           </p>
         </div>
 
@@ -1174,8 +1077,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       {history_chart_html}
     </section>
 
-    {insight_html}
-
     <section class="transfers-section">
       <div class="section-heading">
         <span>Transfer Wire</span>
@@ -1188,15 +1089,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </main>
 
   <script>
-    function closeCelebration() {{
-      var overlay = document.querySelector(".celebration-overlay");
-      if (overlay) overlay.classList.add("hidden");
-    }}
-
-    window.addEventListener("keydown", function(event) {{
-      if (event.key === "Escape") closeCelebration();
-    }});
-
     function tuneHistoryChart() {{
       if (!window.Plotly) return;
 
@@ -1259,6 +1151,10 @@ def generate_html(gw, players, history_chart_html):
     for mid, info in MANAGERS.items():
         total_points, live_rank = get_manager_summary(mid)
         points, chip = get_picks(mid, gw)
+
+        if gw == 1 and points == 0 and total_points:
+            points = total_points
+
         transfers = get_transfers(mid, gw)
 
         trans_lines = []
@@ -1346,17 +1242,13 @@ def generate_html(gw, players, history_chart_html):
           <td><span class="{chip_class}">{s['chip']}</span></td>
         </tr>"""
 
-    insight_html = get_insights(gw)
     summary_html = build_summary_html(standings, gw)
-    celebration_html = build_celebration_html(standings)
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
-        celebration_html=celebration_html,
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
-        insight_html=insight_html,
         history_chart_html=history_chart_html
     )
 

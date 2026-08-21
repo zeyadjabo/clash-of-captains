@@ -243,6 +243,11 @@
       border-color: rgba(77,225,255,0.42);
     }
 
+    .previous-champion-card {
+      border-color: rgba(245,200,76,0.30);
+      background: linear-gradient(145deg, rgba(35,28,15,0.78), rgba(10,14,25,0.94));
+    }
+
     .section-panel {
       border-radius: 8px;
       padding: 24px;
@@ -349,6 +354,15 @@
       overflow: hidden;
     }
 
+    .empty-chart-note {
+      color: var(--muted);
+      padding: 36px 18px;
+      border: 1px dashed rgba(255,255,255,0.16);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.035);
+      text-align: center;
+    }
+
     .insight-grid,
     .container {
       display: grid;
@@ -451,121 +465,6 @@
       font-weight: 800;
     }
 
-    .celebration-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background:
-        radial-gradient(circle at 50% 30%, rgba(245,200,76,0.18), transparent 34%),
-        rgba(3, 6, 12, 0.88);
-      backdrop-filter: blur(12px);
-    }
-
-    .celebration-overlay.hidden {
-      display: none;
-    }
-
-    .celebration-card {
-      position: relative;
-      width: min(560px, 100%);
-      overflow: hidden;
-      border: 1px solid rgba(245,200,76,0.50);
-      border-radius: 10px;
-      padding: 34px;
-      background: linear-gradient(145deg, rgba(22,30,50,0.96), rgba(8,12,22,0.98));
-      box-shadow: 0 34px 110px rgba(0,0,0,0.55);
-      text-align: center;
-    }
-
-    .celebration-close {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 34px;
-      height: 34px;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      font-size: 1.15rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .celebration-kicker {
-      color: var(--cyan);
-      font-size: 0.72rem;
-      font-weight: 900;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .celebration-name {
-      margin: 16px 0 8px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2.8rem, 10vw, 5.8rem);
-      line-height: 0.95;
-      color: var(--gold);
-      text-transform: uppercase;
-    }
-
-    .celebration-score {
-      font-size: clamp(1.7rem, 5vw, 3rem);
-      font-weight: 900;
-    }
-
-    .celebration-note {
-      margin-top: 14px;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .confetti {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .confetti i {
-      position: absolute;
-      top: -18px;
-      width: 8px;
-      height: 14px;
-      border-radius: 2px;
-      background: var(--gold);
-      animation: confettiFall 2400ms linear infinite;
-    }
-
-    .confetti i:nth-child(3n) {
-      background: var(--cyan);
-    }
-
-    .confetti i:nth-child(4n) {
-      background: var(--rose);
-    }
-
-    .confetti i:nth-child(5n) {
-      background: var(--green);
-    }
-
-    @keyframes confettiFall {
-      0% {
-        transform: translateY(-20px) rotate(0deg);
-        opacity: 0;
-      }
-      12% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(620px) rotate(540deg);
-        opacity: 0;
-      }
-    }
-
     .fade-in {
       animation: riseIn 700ms ease both;
     }
@@ -645,19 +544,6 @@
 </head>
 
 <body>
-  
-  <div class="celebration-overlay" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
-    <div class="celebration-card">
-      <div class="confetti" aria-hidden="true"><i style="left:0%; animation-delay:0.00s; animation-duration:2.00s;"></i><i style="left:7%; animation-delay:0.13s; animation-duration:2.22s;"></i><i style="left:14%; animation-delay:0.26s; animation-duration:2.44s;"></i><i style="left:21%; animation-delay:0.39s; animation-duration:2.66s;"></i><i style="left:28%; animation-delay:0.52s; animation-duration:2.88s;"></i><i style="left:35%; animation-delay:0.65s; animation-duration:2.00s;"></i><i style="left:42%; animation-delay:0.78s; animation-duration:2.22s;"></i><i style="left:49%; animation-delay:0.91s; animation-duration:2.44s;"></i><i style="left:56%; animation-delay:1.04s; animation-duration:2.66s;"></i><i style="left:63%; animation-delay:1.17s; animation-duration:2.88s;"></i><i style="left:70%; animation-delay:1.30s; animation-duration:2.00s;"></i><i style="left:77%; animation-delay:1.43s; animation-duration:2.22s;"></i><i style="left:84%; animation-delay:0.00s; animation-duration:2.44s;"></i><i style="left:91%; animation-delay:0.13s; animation-duration:2.66s;"></i><i style="left:98%; animation-delay:0.26s; animation-duration:2.88s;"></i><i style="left:5%; animation-delay:0.39s; animation-duration:2.00s;"></i><i style="left:12%; animation-delay:0.52s; animation-duration:2.22s;"></i><i style="left:19%; animation-delay:0.65s; animation-duration:2.44s;"></i><i style="left:26%; animation-delay:0.78s; animation-duration:2.66s;"></i><i style="left:33%; animation-delay:0.91s; animation-duration:2.88s;"></i><i style="left:40%; animation-delay:1.04s; animation-duration:2.00s;"></i><i style="left:47%; animation-delay:1.17s; animation-duration:2.22s;"></i><i style="left:54%; animation-delay:1.30s; animation-duration:2.44s;"></i><i style="left:61%; animation-delay:1.43s; animation-duration:2.66s;"></i><i style="left:68%; animation-delay:0.00s; animation-duration:2.88s;"></i><i style="left:75%; animation-delay:0.13s; animation-duration:2.00s;"></i><i style="left:82%; animation-delay:0.26s; animation-duration:2.22s;"></i><i style="left:89%; animation-delay:0.39s; animation-duration:2.44s;"></i><i style="left:96%; animation-delay:0.52s; animation-duration:2.66s;"></i><i style="left:3%; animation-delay:0.65s; animation-duration:2.88s;"></i><i style="left:10%; animation-delay:0.78s; animation-duration:2.00s;"></i><i style="left:17%; animation-delay:0.91s; animation-duration:2.22s;"></i><i style="left:24%; animation-delay:1.04s; animation-duration:2.44s;"></i><i style="left:31%; animation-delay:1.17s; animation-duration:2.66s;"></i><i style="left:38%; animation-delay:1.30s; animation-duration:2.88s;"></i><i style="left:45%; animation-delay:1.43s; animation-duration:2.00s;"></i></div>
-      <button class="celebration-close" type="button" aria-label="Close celebration" onclick="closeCelebration()">×</button>
-      <div class="celebration-kicker">2025/2026 Season Champion</div>
-      <div class="celebration-name" id="celebration-title">Zee</div>
-      <div class="celebration-score">0 pts</div>
-      <p class="celebration-note">Sesko n Destroy finished the campaign on top. The dashboard will be here when the confetti clears.</p>
-    </div>
-  </div>
-
-
   <main class="page-shell">
     <section class="hero fade-in">
       <div class="hero-copy">
@@ -666,13 +552,12 @@
           <h1>Clash of Captains</h1>
           <p>
             A private war room for the title race • Live standings, pressure points, and weekly swings that decide bragging rights.
-            <span class="joey-dunk">(Joey is currently losing, like always)</span>
           </p>
         </div>
 
         <div class="hero-meta">
-          <span class="status-pill live">Gameweek 38</span>
-          <span class="status-pill">Last scanned: 2026-08-21 09:43 AM EDT</span>
+          <span class="status-pill live">Gameweek 1</span>
+          <span class="status-pill">Last scanned: 2026-08-21 04:47 PM EDT</span>
           <span class="status-pill">Updates 9 AM & 9 PM Eastern</span>
           <span class="status-pill">Manual refresh by WhatsApp request</span>
         </div>
@@ -683,26 +568,32 @@
   <section class="summary-grid" aria-label="Executive summary">
     <article class="metric-card gw-card">
       <span class="metric-label">Live Race</span>
-      <strong>GW38</strong>
-      <small>Season 25/26</small>
+      <strong>GW1</strong>
+      <small>Season 2026/2027</small>
+    </article>
+
+    <article class="metric-card previous-champion-card">
+      <span class="metric-label">2025/2026 Champion</span>
+      <strong>Zee</strong>
+      <small>Sesko n Destroy • 2,223 pts</small>
     </article>
 
     <article class="metric-card accent-gold">
       <span class="metric-label">Leader</span>
-      <strong>🤖 Sesko n Destroy</strong>
-      <small>Zee • 0 pts</small>
+      <strong>💩 BAKHAAT</strong>
+      <small>Joey • 20 pts</small>
     </article>
 
     <article class="metric-card">
       <span class="metric-label">Race Gap</span>
-      <strong>0 pts</strong>
+      <strong>14 pts</strong>
       <small>1st to 2nd</small>
     </article>
 
     <article class="metric-card accent-cyan">
       <span class="metric-label">Best GW</span>
-      <strong>0 pts</strong>
-      <small>Zee this week</small>
+      <strong>20 pts</strong>
+      <small>Joey this week</small>
     </article>
 
     <article class="metric-card wide">
@@ -731,34 +622,34 @@
           </tr>
         </thead>
         <tbody>
-        <tr class="yours">
+        <tr>
           <td><span class="rank-badge">#1</span></td>
-          <td>🤖 Sesko n Destroy</td>
-          <td>Zee</td>
-          <td class="num"><strong>0</strong></td>
-          <td class="num">0</td>
+          <td>💩 BAKHAAT</td>
+          <td>Joey</td>
+          <td class="num"><strong>20</strong></td>
+          <td class="num">20</td>
           <td class="num">Leader</td>
-          <td class="num">#0</td>
+          <td class="num">#1,381,605</td>
           <td><span class="chip none">None</span></td>
         </tr>
-        <tr>
+        <tr class="yours">
           <td><span class="rank-badge">#2</span></td>
-          <td>🇪🇬 Fergie Time United</td>
-          <td>Sam</td>
-          <td class="num"><strong>0</strong></td>
-          <td class="num">0</td>
-          <td class="num">Leader</td>
-          <td class="num">#0</td>
+          <td>🤖 Sesko n Destroy</td>
+          <td>Zee</td>
+          <td class="num"><strong>6</strong></td>
+          <td class="num">6</td>
+          <td class="num">-14</td>
+          <td class="num">#6,699,513</td>
           <td><span class="chip none">None</span></td>
         </tr>
         <tr>
           <td><span class="rank-badge">#3</span></td>
-          <td>💩 BAKHAAT</td>
-          <td>Joey</td>
+          <td>🇪🇬 Fergie Time United</td>
+          <td>Sam</td>
           <td class="num"><strong>0</strong></td>
           <td class="num">0</td>
-          <td class="num">Leader</td>
-          <td class="num">#0</td>
+          <td class="num">-20</td>
+          <td class="num">#8,198,598</td>
           <td><span class="chip none">None</span></td>
         </tr></tbody>
       </table>
@@ -768,42 +659,8 @@
       <div class="section-heading">
         <h2>Historical rank progress</h2>
       </div>
-      <p style="color:#888;">No history data loaded.</p>
+      <p class="empty-chart-note">Rank history starts once GW1 data is fully processed.</p>
     </section>
-
-    
-  <section class="section-panel insight-box">
-    <div class="section-heading">
-      <h2>SEASON CONCLUSION</h2>
-    </div>
-
-      <div class="insight-grid season-conclusion-grid">
-        <div class="insight-item">
-          <strong>Final Whistle</strong>
-          <p>
-          No more Gameweeks. No more excuses. The spreadsheets and data analytics are retired, the season is officially dead, and I’m sitting on top collecting my bragging rights like rent.<br><br>
-          Sam went full “ya basha” mode again, consulting every Egyptian YouTuber known to man, but even the Pharaohs curse couldn’t save him for the second year in a row. Meanwhile Joey’s still stuck in the stone age, resisting AI and advanced data like it’s the plague and cheering for Sam to win instead of putting in the work himself for the third year running. Absolute disaster.<br><br>
-          Season closed. My league title is secured. Rivalries remain open. Thanks for watching.
-          </p>
-        </div>
-
-        <div class="insight-item">
-          <strong>Season Verdict</strong>
-          <p>
-          Credit where it’s due: Sam turned up the intensity in the final leg and made it fun to play. But Joey? Man’s been providing elite motivation all season and nothing gets me going like the desire to squash him like a bug. Receipts are being filed and screenshotted for group chat use all summer.
-          </p>
-        </div>
-      </div>
-
-      <p class="insight-note">
-        Season closed. Rivalries remain open.
-      </p>
-
-      <p class="insight-warning">
-        The best advice remains unchanged: do the opposite of what the great Joey Yakeera suggests. Not only in FPL but in life in general. FFS, the guy lives in California, that tells you a lot lol.
-      </p>
-  </section>
-        
 
     <section class="transfers-section">
       <div class="section-heading">
@@ -846,15 +703,6 @@
   </main>
 
   <script>
-    function closeCelebration() {
-      var overlay = document.querySelector(".celebration-overlay");
-      if (overlay) overlay.classList.add("hidden");
-    }
-
-    window.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeCelebration();
-    });
-
     function tuneHistoryChart() {
       if (!window.Plotly) return;
 
