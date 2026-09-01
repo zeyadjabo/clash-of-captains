@@ -211,12 +211,13 @@ def generate_history_chart(managers, current_gw):
             template="plotly_dark",
             autosize=True,
             height=680,
-            margin=dict(l=70, r=20, t=70, b=60),
+            margin=dict(l=70, r=20, t=96, b=60),
             legend=dict(
-                yanchor="top",
-                y=0.99,
+                orientation="h",
+                yanchor="bottom",
+                y=1.04,
                 xanchor="left",
-                x=0.01
+                x=0
             ),
             yaxis=dict(
                 autorange="reversed",
@@ -1168,15 +1169,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       Plotly.relayout(chart, {{
         height: mobile ? 500 : 660,
         margin: mobile
-          ? {{ l: 44, r: 8, t: 34, b: 46 }}
-          : {{ l: 70, r: 20, t: 34, b: 60 }},
+          ? {{ l: 44, r: 8, t: 76, b: 46 }}
+          : {{ l: 70, r: 20, t: 96, b: 60 }},
         font: {{ size: mobile ? 10 : 12 }},
         "title.font.size": mobile ? 13 : 18,
-        "legend.orientation": mobile ? "h" : "v",
-        "legend.x": mobile ? 0 : 0.01,
-        "legend.y": mobile ? 1.16 : 0.99,
+        "legend.orientation": "h",
+        "legend.x": 0,
+        "legend.y": mobile ? 1.14 : 1.04,
         "legend.xanchor": "left",
-        "legend.yanchor": "top",
+        "legend.yanchor": "bottom",
         "xaxis.dtick": mobile ? 4 : 1,
         "xaxis.title.text": mobile ? "GW" : "Gameweek",
         "yaxis.title.text": mobile ? "Rank" : "Overall Rank"
