@@ -328,10 +328,17 @@ def build_rivalry_archive_html(managers):
             if record:
                 rank = format_rank(record["rank"])
                 points = format_number(record["total_points"])
+                rank_percentage = record.get("rank_percentage")
+                percentage_label = (
+                    f"Top {rank_percentage}%"
+                    if rank_percentage not in (None, "")
+                    else "Top % unavailable"
+                )
                 cells.append(
                     "<td>"
                     f"<strong>{escape(rank)}</strong>"
                     f"<small>{escape(points)} pts</small>"
+                    f"<small>{escape(percentage_label)}</small>"
                     "</td>"
                 )
             else:
@@ -348,7 +355,7 @@ def build_rivalry_archive_html(managers):
           <details class="rivalry-archive">
             <summary>Rivalry Archive</summary>
             <div class="rivalry-archive-panel">
-              <span>Historical overall ranks and points</span>
+              <span>Historical overall ranks, points, and percentile</span>
               <table>
                 <thead>
                   <tr>
