@@ -632,6 +632,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .hero {{
+      position: relative;
+      z-index: 20;
       min-height: 430px;
       display: block;
       padding: 36px 0 20px;
@@ -783,7 +785,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       position: absolute;
       right: 0;
       top: calc(100% + 10px);
-      z-index: 10;
+      z-index: 30;
       width: min(340px, calc(100vw - 32px));
       padding: 14px;
       border: 1px solid rgba(245,200,76,0.32);
@@ -828,6 +830,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .summary-grid {{
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
