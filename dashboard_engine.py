@@ -16,8 +16,9 @@ OUTPUT_FILE = "index.html"
 ACTIVE_SEASON = "2026/2027"
 ARCHIVE_SEASONS = ["2025/26", "2024/25", "2023/24"]
 PAST_CHAMPIONS = [
+    {"season": "2025/2026", "manager": "Zee", "team": "Sesko n Destroy", "points": 2223},
     {"season": "2024/2025", "manager": "Zee", "team": "Cunha Matata", "points": None},
-    {"season": "2025/2026", "manager": "Zee", "team": "Sesko n Destroy", "points": 2223}
+    {"season": "2023/2024", "manager": "No record", "team": "No record", "points": None}
 ]
 
 
@@ -289,23 +290,34 @@ def build_trophy_cabinet_html():
 
     for champion in PAST_CHAMPIONS:
         points = champion.get("points")
-        points_label = f" • {format_number(points)} pts" if points else ""
         rows.append(
-            "<li>"
-            f"<span>{escape(champion['season'])}</span>"
-            f"<strong>{escape(champion['manager'])}</strong>"
-            f"<small>{escape(champion['team'])}{points_label}</small>"
-            "</li>"
+            "<tr>"
+            f"<td>{escape(champion['season'])}</td>"
+            f"<td>{escape(champion['manager'])}</td>"
+            f"<td>{escape(champion['team'])}</td>"
+            f"<td>{format_number(points) if points else '-'}</td>"
+            "</tr>"
         )
 
     return f"""
           <details class="trophy-cabinet">
             <summary>Trophy Cabinet</summary>
             <div class="trophy-cabinet-panel">
-              <ul>
-                {''.join(rows)}
-              </ul>
-              <p>Back-to-back champion. The group chat remembers.</p>
+              <span>Historical champions</span>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Season</th>
+                    <th>Champion</th>
+                    <th>Team</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {''.join(rows)}
+                </tbody>
+              </table>
+              <p>Back-to-back champion. Kai Laa Nansaa.</p>
             </div>
           </details>
 """
@@ -882,44 +894,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .trophy-cabinet-panel {{
-      width: min(340px, calc(100vw - 32px));
+      width: min(620px, calc(100vw - 32px));
     }}
 
-    .trophy-cabinet ul {{
-      list-style: none;
-      display: grid;
-      gap: 10px;
-    }}
-
-    .trophy-cabinet li {{
-      display: grid;
-      gap: 3px;
-    }}
-
-    .trophy-cabinet li span {{
-      color: var(--cyan);
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }}
-
-    .trophy-cabinet li strong {{
-      font-size: 1.1rem;
-    }}
-
-    .trophy-cabinet li small {{
-      color: var(--muted);
-    }}
-
-    .trophy-cabinet p {{
-      margin-top: 12px;
-      color: var(--rose);
-      font-size: 0.82rem;
-      font-weight: 800;
-      line-height: 1.35;
-    }}
-
+    .trophy-cabinet-panel > span,
     .rivalry-archive-panel > span {{
       display: block;
       margin-bottom: 12px;
@@ -930,12 +908,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-transform: uppercase;
     }}
 
+    .trophy-cabinet p {{
+      margin-top: 12px;
+      color: var(--rose);
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }}
+
+    .trophy-cabinet table,
     .rivalry-archive table {{
       width: 100%;
       min-width: 0;
       border-collapse: collapse;
     }}
 
+    .trophy-cabinet th,
+    .trophy-cabinet td,
     .rivalry-archive th,
     .rivalry-archive td {{
       padding: 9px 8px;
@@ -945,6 +934,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       white-space: nowrap;
     }}
 
+    .trophy-cabinet th,
     .rivalry-archive th {{
       color: var(--gold);
       background: transparent;
@@ -1332,6 +1322,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         width: 100%;
       }}
 
+      .trophy-cabinet-panel,
       .rivalry-archive-panel {{
         overflow-x: auto;
       }}
