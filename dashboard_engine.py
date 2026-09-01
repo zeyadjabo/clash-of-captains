@@ -328,9 +328,11 @@ def build_rivalry_archive_html(managers):
     }
     columns = ["Zee", "Sam", "Joey"]
     rows = []
+    mobile_cards = []
 
     for season in ARCHIVE_SEASONS:
         cells = []
+        mobile_entries = []
 
         for manager in columns:
             record = histories.get(manager, {}).get(season)
@@ -351,14 +353,33 @@ def build_rivalry_archive_html(managers):
                     f"<small>{escape(percentage_label)}</small>"
                     "</td>"
                 )
+                mobile_entries.append(
+                    "<div>"
+                    f"<strong>{escape(manager)}</strong>"
+                    f"<span>{escape(rank)}</span>"
+                    f"<small>{escape(points)} pts • {escape(percentage_label)}</small>"
+                    "</div>"
+                )
             else:
                 cells.append("<td>No record</td>")
+                mobile_entries.append(
+                    "<div>"
+                    f"<strong>{escape(manager)}</strong>"
+                    "<span>No record</span>"
+                    "</div>"
+                )
 
         rows.append(
             "<tr>"
             f"<td>{escape(season.replace('/', '/20'))}</td>"
             f"{''.join(cells)}"
             "</tr>"
+        )
+        mobile_cards.append(
+            "<article class=\"archive-season-card\">"
+            f"<h3>{escape(season.replace('/', '/20'))}</h3>"
+            f"{''.join(mobile_entries)}"
+            "</article>"
         )
 
     return f"""
@@ -379,6 +400,9 @@ def build_rivalry_archive_html(managers):
                   {''.join(rows)}
                 </tbody>
               </table>
+              <div class="archive-mobile-list">
+                {''.join(mobile_cards)}
+              </div>
               <p>Missing seasons mean FPL does not expose that season for the current account ID.</p>
             </div>
           </details>
@@ -953,6 +977,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 0.74rem;
     }}
 
+    .archive-mobile-list {{
+      display: none;
+    }}
+
     .rivalry-archive p {{
       margin-top: 12px;
       color: var(--muted);
@@ -1324,6 +1352,55 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       .trophy-cabinet-panel,
       .rivalry-archive-panel {{
         overflow-x: auto;
+      }}
+
+      .rivalry-archive table {{
+        display: none;
+      }}
+
+      .archive-mobile-list {{
+        display: grid;
+        gap: 10px;
+      }}
+
+      .archive-season-card {{
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.04);
+      }}
+
+      .archive-season-card h3 {{
+        margin: 0;
+        color: var(--gold);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+      }}
+
+      .archive-season-card div {{
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+        gap: 4px 10px;
+        align-items: baseline;
+      }}
+
+      .archive-season-card strong {{
+        color: var(--cyan);
+        font-size: 0.78rem;
+      }}
+
+      .archive-season-card span {{
+        color: var(--text);
+        font-size: 0.9rem;
+        font-weight: 800;
+      }}
+
+      .archive-season-card small {{
+        grid-column: 2;
+        color: var(--muted);
+        font-size: 0.76rem;
       }}
 
       .summary-grid,
