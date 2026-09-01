@@ -324,8 +324,18 @@ def build_rivalry_archive_html(managers):
 
         for manager in columns:
             record = histories.get(manager, {}).get(season)
-            rank = format_rank(record["rank"]) if record else "No record"
-            cells.append(f"<td>{escape(rank)}</td>")
+
+            if record:
+                rank = format_rank(record["rank"])
+                points = format_number(record["total_points"])
+                cells.append(
+                    "<td>"
+                    f"<strong>{escape(rank)}</strong>"
+                    f"<small>{escape(points)} pts</small>"
+                    "</td>"
+                )
+            else:
+                cells.append("<td>No record</td>")
 
         rows.append(
             "<tr>"
@@ -338,7 +348,7 @@ def build_rivalry_archive_html(managers):
           <details class="rivalry-archive">
             <summary>Rivalry Archive</summary>
             <div class="rivalry-archive-panel">
-              <span>Historical overall ranks</span>
+              <span>Historical overall ranks and points</span>
               <table>
                 <thead>
                   <tr>
@@ -932,6 +942,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: var(--gold);
       background: transparent;
       letter-spacing: 0.08em;
+    }}
+
+    .rivalry-archive td strong {{
+      display: block;
+      color: var(--text);
+      font-size: 0.84rem;
+    }}
+
+    .rivalry-archive td small {{
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.74rem;
     }}
 
     .rivalry-archive p {{
