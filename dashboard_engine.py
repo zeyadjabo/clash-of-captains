@@ -14,6 +14,7 @@ TRACKED_MANAGERS = {
 
 OUTPUT_FILE = "index.html"
 ACTIVE_SEASON = "2026/2027"
+ARCHIVE_SEASONS = ["2025/26", "2024/25", "2023/24"]
 PAST_CHAMPIONS = [
     {"season": "2024/2025", "manager": "Zee", "team": "Cunha Matata", "points": None},
     {"season": "2025/2026", "manager": "Zee", "team": "Sesko n Destroy", "points": 2223}
@@ -159,6 +160,22 @@ def get_transfers(entry_id, gw):
     return []
 
 
+def get_manager_past_seasons(entry_id):
+    try:
+        data = requests.get(
+            f"https://fantasy.premierleague.com/api/entry/{entry_id}/history/",
+            timeout=8
+        ).json()
+    except Exception:
+        return {}
+
+    return {
+        season.get("season_name"): season
+        for season in data.get("past", [])
+        if season.get("season_name")
+    }
+
+
 # ====================== HISTORY CHART ======================
 def generate_history_chart(managers, current_gw):
     print("Fetching Overall Rank history...\n")
@@ -289,6 +306,53 @@ def build_trophy_cabinet_html():
                 {''.join(rows)}
               </ul>
               <p>Back-to-back champion. The group chat remembers.</p>
+            </div>
+          </details>
+"""
+
+
+def build_rivalry_archive_html(managers):
+    histories = {
+        manager["name"]: get_manager_past_seasons(manager["id"])
+        for manager in managers
+    }
+    columns = ["Zee", "Sam", "Joey"]
+    rows = []
+
+    for season in ARCHIVE_SEASONS:
+        cells = []
+
+        for manager in columns:
+            record = histories.get(manager, {}).get(season)
+            rank = format_rank(record["rank"]) if record else "No record"
+            cells.append(f"<td>{escape(rank)}</td>")
+
+        rows.append(
+            "<tr>"
+            f"<td>{escape(season.replace('/', '/20'))}</td>"
+            f"{''.join(cells)}"
+            "</tr>"
+        )
+
+    return f"""
+          <details class="rivalry-archive">
+            <summary>Rivalry Archive</summary>
+            <div class="rivalry-archive-panel">
+              <span>Historical overall ranks</span>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Season</th>
+                    <th>Zee</th>
+                    <th>Sam</th>
+                    <th>Joey</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {''.join(rows)}
+                </tbody>
+              </table>
+              <p>Missing seasons mean FPL does not expose that season for the current account ID.</p>
             </div>
           </details>
 """
@@ -746,11 +810,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-color: transparent;
     }}
 
-    .trophy-cabinet {{
+    .trophy-cabinet,
+    .rivalry-archive {{
       position: relative;
     }}
 
-    .trophy-cabinet summary {{
+    .trophy-cabinet summary,
+    .rivalry-archive summary {{
       display: inline-flex;
       align-items: center;
       min-height: 36px;
@@ -767,31 +833,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-transform: uppercase;
     }}
 
-    .trophy-cabinet summary::-webkit-details-marker {{
+    .trophy-cabinet summary::-webkit-details-marker,
+    .rivalry-archive summary::-webkit-details-marker {{
       display: none;
     }}
 
-    .trophy-cabinet summary::after {{
+    .trophy-cabinet summary::after,
+    .rivalry-archive summary::after {{
       content: '▾';
       margin-left: 8px;
       font-size: 0.82rem;
     }}
 
-    .trophy-cabinet[open] summary::after {{
+    .trophy-cabinet[open] summary::after,
+    .rivalry-archive[open] summary::after {{
       content: '▴';
     }}
 
-    .trophy-cabinet-panel {{
+    .trophy-cabinet-panel,
+    .rivalry-archive-panel {{
       position: absolute;
       right: 0;
       top: calc(100% + 10px);
       z-index: 30;
-      width: min(340px, calc(100vw - 32px));
+      width: min(520px, calc(100vw - 32px));
       padding: 14px;
       border: 1px solid rgba(245,200,76,0.32);
       border-radius: 8px;
       background: rgba(8, 11, 19, 0.98);
       box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    }}
+
+    .trophy-cabinet-panel {{
+      width: min(340px, calc(100vw - 32px));
     }}
 
     .trophy-cabinet ul {{
@@ -827,6 +901,44 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 0.82rem;
       font-weight: 800;
       line-height: 1.35;
+    }}
+
+    .rivalry-archive-panel > span {{
+      display: block;
+      margin-bottom: 12px;
+      color: var(--cyan);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }}
+
+    .rivalry-archive table {{
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+    }}
+
+    .rivalry-archive th,
+    .rivalry-archive td {{
+      padding: 9px 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.82rem;
+      text-align: left;
+      white-space: nowrap;
+    }}
+
+    .rivalry-archive th {{
+      color: var(--gold);
+      background: transparent;
+      letter-spacing: 0.08em;
+    }}
+
+    .rivalry-archive p {{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
     }}
 
     .summary-grid {{
@@ -1172,18 +1284,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }}
 
       .trophy-cabinet,
-      .trophy-cabinet summary {{
+      .rivalry-archive,
+      .trophy-cabinet summary,
+      .rivalry-archive summary {{
         width: 100%;
       }}
 
-      .trophy-cabinet summary {{
+      .trophy-cabinet summary,
+      .rivalry-archive summary {{
         justify-content: center;
       }}
 
-      .trophy-cabinet-panel {{
+      .trophy-cabinet-panel,
+      .rivalry-archive-panel {{
         left: 0;
         right: auto;
         width: 100%;
+      }}
+
+      .rivalry-archive-panel {{
+        overflow-x: auto;
       }}
 
       .summary-grid,
@@ -1237,6 +1357,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span class="status-pill">Updates 9 AM & 9 PM Eastern</span>
           <span class="status-pill">Manual refresh by WhatsApp request</span>
           {trophy_html}
+          {archive_html}
         </div>
       </div>
     </section>
@@ -1435,10 +1556,12 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
 
     summary_html = build_summary_html(standings, gw, gw_average)
     trophy_html = build_trophy_cabinet_html()
+    archive_html = build_rivalry_archive_html(managers)
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
         trophy_html=trophy_html,
+        archive_html=archive_html,
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
