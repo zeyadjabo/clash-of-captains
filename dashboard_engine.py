@@ -1,13 +1,15 @@
 import requests
+from html import escape
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import plotly.graph_objects as go
 
 # CONFIG
-MANAGERS = {
-    1630460: {"name": "Zee", "team": "Sesko n Destroy", "yours": True},
-    533668:  {"name": "Sam", "team": "Fergie Time United", "yours": False},
-    7617214: {"name": "Joey", "team": "BAKHAAT", "yours": False}
+LEAGUE_ID = 966498
+TRACKED_MANAGERS = {
+    "Zee Jabo": {"name": "Zee", "emoji": "🤖", "yours": True},
+    "Sam Wadea": {"name": "Sam", "emoji": "🇪🇬", "yours": False},
+    "Jozeph Yakeera": {"name": "Joey", "emoji": "💩", "yours": False}
 }
 
 OUTPUT_FILE = "index.html"
@@ -60,6 +62,65 @@ def get_manager_summary(entry_id):
         return 0, "N/A"
 
 
+def get_league_managers():
+    tracked_names = set(TRACKED_MANAGERS)
+    found = {}
+    page = 1
+
+    while tracked_names - set(found):
+        url = (
+            f"https://fantasy.premierleague.com/api/leagues-classic/{LEAGUE_ID}/"
+            f"standings/?page_standings={page}"
+        )
+
+        try:
+            data = requests.get(url, timeout=10).json()
+        except Exception as e:
+            raise Exception(f"League standings failed: {e}")
+
+        standings = data.get("standings", {})
+        results = standings.get("results", [])
+
+        for row in results:
+            player_name = row.get("player_name", "")
+
+            if player_name in tracked_names:
+                profile = TRACKED_MANAGERS[player_name]
+                found[player_name] = {
+                    "id": row.get("entry"),
+                    "name": profile["name"],
+                    "full_name": player_name,
+                    "team": row.get("entry_name", "Unknown team"),
+                    "emoji": profile["emoji"],
+                    "yours": profile["yours"],
+                    "league_rank": row.get("rank"),
+                    "last_rank": row.get("last_rank"),
+                    "total": row.get("total", 0),
+                    "event_total": row.get("event_total", 0)
+                }
+
+        has_next = standings.get("has_next", False)
+
+        if not has_next:
+            break
+
+        page += 1
+
+    missing = tracked_names - set(found)
+
+    if missing:
+        raise Exception(
+            "Could not find tracked managers in league "
+            f"{LEAGUE_ID}: {', '.join(sorted(missing))}"
+        )
+
+    managers = list(found.values())
+    managers.sort(key=lambda m: int(m.get("league_rank") or 999999))
+
+    print(f"Loaded {len(managers)} tracked managers from league {LEAGUE_ID}")
+    return managers
+
+
 def get_picks(entry_id, gw):
     try:
         data = requests.get(
@@ -99,16 +160,17 @@ def get_transfers(entry_id, gw):
 
 
 # ====================== HISTORY CHART ======================
-def generate_history_chart():
+def generate_history_chart(managers, current_gw):
     print("Fetching Overall Rank history...\n")
 
     fig = go.Figure()
 
-    for entry_id, info in MANAGERS.items():
+    for info in managers:
+        entry_id = info["id"]
         gws = []
         overall_ranks = []
 
-        for gw in range(1, 39):
+        for gw in range(1, current_gw + 1):
             url = f"https://fantasy.premierleague.com/api/entry/{entry_id}/event/{gw}/picks/"
 
             try:
@@ -162,7 +224,7 @@ def generate_history_chart():
             xaxis=dict(
                 tickmode="linear",
                 dtick=1,
-                range=[1, 38]
+                range=[1, max(current_gw, 2)]
             )
         )
 
@@ -213,7 +275,7 @@ def build_summary_html(standings, gw):
     leader_gap = max(leader["total"] - second["total"], 0)
     active_chips = [s for s in standings if s["chip"] != "None"]
     chip_items = "".join(
-        f'<span class="chip-desk-pill">{s["manager"]}: {s["chip"]}</span>'
+        f'<span class="chip-desk-pill">{escape(s["manager"])}: {escape(s["chip"])}</span>'
         for s in active_chips
     ) or '<span class="chip-desk-pill muted">No active chips</span>'
 
@@ -233,8 +295,8 @@ def build_summary_html(standings, gw):
 
     <article class="metric-card accent-gold">
       <span class="metric-label">Leader</span>
-      <strong>{leader['emoji']} {leader['team']}</strong>
-      <small>{leader['manager']} • {format_number(leader['total'])} pts</small>
+      <strong>{leader['emoji']} {escape(leader['team'])}</strong>
+      <small>{escape(leader['manager'])} • {format_number(leader['total'])} pts</small>
     </article>
 
     <article class="metric-card">
@@ -246,7 +308,7 @@ def build_summary_html(standings, gw):
     <article class="metric-card accent-cyan">
       <span class="metric-label">Best GW</span>
       <strong>{best_gw['gw']} pts</strong>
-      <small>{best_gw['manager']} this week</small>
+      <small>{escape(best_gw['manager'])} this week</small>
     </article>
 
     <article class="metric-card wide">
@@ -1141,21 +1203,23 @@ CARD_TEMPLATE = """
 
 
 # ====================== HTML GENERATION ======================
-def generate_html(gw, players, history_chart_html):
+def generate_html(gw, players, managers, history_chart_html):
     cards = []
     standings = []
 
     est = ZoneInfo("America/New_York")
     timestamp = datetime.now(est).strftime("%Y-%m-%d %I:%M %p %Z")
 
-    for mid, info in MANAGERS.items():
-        total_points, live_rank = get_manager_summary(mid)
-        points, chip = get_picks(mid, gw)
+    for info in managers:
+        entry_id = info["id"]
+        _, live_rank = get_manager_summary(entry_id)
+        total_points = info["total"]
+        points, chip = get_picks(entry_id, gw)
 
-        if gw == 1 and points == 0 and total_points:
-            points = total_points
+        if info["event_total"]:
+            points = info["event_total"]
 
-        transfers = get_transfers(mid, gw)
+        transfers = get_transfers(entry_id, gw)
 
         trans_lines = []
 
@@ -1183,18 +1247,10 @@ def generate_html(gw, players, history_chart_html):
 
         cards.append(CARD_TEMPLATE.format(
             yours_class="yours" if info["yours"] else "",
-            team=info["team"],
-            manager=info["name"],
+            team=escape(info["team"]),
+            manager=escape(info["name"]),
             transfers_html=transfers_html
         ))
-
-        emojis = {
-            "Sesko n Destroy": "🤖",
-            "Fergie Time United": "🇪🇬",
-            "BAKHAAT": "💩"
-        }
-
-        team_emoji = emojis.get(info["team"], "⚽")
 
         display_chip = "None"
 
@@ -1210,31 +1266,34 @@ def generate_html(gw, players, history_chart_html):
 
         standings.append({
             "team": info["team"],
-            "emoji": team_emoji,
+            "emoji": info["emoji"],
             "manager": info["name"],
+            "full_name": info["full_name"],
             "total": total_points,
             "gw": points,
             "rank": live_rank,
+            "league_rank": info["league_rank"],
             "chip": display_chip,
             "yours": info["yours"]
         })
 
-    standings.sort(key=lambda x: x["total"], reverse=True)
+    standings.sort(key=lambda x: int(x.get("league_rank") or 999999))
 
     standings_html = ""
     leader_total = standings[0]["total"] if standings else 0
 
-    for i, s in enumerate(standings, 1):
+    for s in standings:
         row_class = ' class="yours"' if s["yours"] else ""
         gap = leader_total - s["total"]
         gap_label = "Leader" if gap == 0 else f"-{gap}"
         chip_class = "chip none" if s["chip"] == "None" else "chip"
+        league_rank = s.get("league_rank") or "-"
 
         standings_html += f"""
         <tr{row_class}>
-          <td><span class="rank-badge">#{i}</span></td>
-          <td>{s['emoji']} {s['team']}</td>
-          <td>{s['manager']}</td>
+          <td><span class="rank-badge">#{league_rank}</span></td>
+          <td>{s['emoji']} {escape(s['team'])}</td>
+          <td>{escape(s['manager'])}</td>
           <td class="num"><strong>{format_number(s['total'])}</strong></td>
           <td class="num">{s['gw']}</td>
           <td class="num">{gap_label}</td>
@@ -1264,11 +1323,12 @@ if __name__ == "__main__":
 
     try:
         gw, players = get_bootstrap_data()
+        managers = get_league_managers()
 
         print(f"Gameweek: {gw}")
 
-        history_chart_html = generate_history_chart()
-        generate_html(gw, players, history_chart_html)
+        history_chart_html = generate_history_chart(managers, gw)
+        generate_html(gw, players, managers, history_chart_html)
 
     except Exception as e:
         print(f"Error: {e}")
