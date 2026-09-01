@@ -164,6 +164,7 @@ def generate_history_chart(managers, current_gw):
     print("Fetching Overall Rank history...\n")
 
     fig = go.Figure()
+    display_until_gw = min(current_gw + 5, 38)
 
     for info in managers:
         entry_id = info["id"]
@@ -224,7 +225,7 @@ def generate_history_chart(managers, current_gw):
             xaxis=dict(
                 tickmode="linear",
                 dtick=1,
-                range=[1, max(current_gw, 2)]
+                range=[1, max(display_until_gw, 2)]
             )
         )
 
