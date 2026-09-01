@@ -14,12 +14,10 @@ TRACKED_MANAGERS = {
 
 OUTPUT_FILE = "index.html"
 ACTIVE_SEASON = "2026/2027"
-PREVIOUS_CHAMPION = {
-    "season": "2025/2026",
-    "manager": "Zee",
-    "team": "Sesko n Destroy",
-    "points": 2223
-}
+PAST_CHAMPIONS = [
+    {"season": "2024/2025", "manager": "Zee", "team": "Cunha Matata", "points": None},
+    {"season": "2025/2026", "manager": "Zee", "team": "Sesko n Destroy", "points": 2223}
+]
 
 
 # ====================== DATA FETCHING ======================
@@ -38,10 +36,12 @@ def get_bootstrap_data():
             ]
             current_gw = max(processed) if processed else events[-1]["id"]
 
+        current_event = next((e for e in events if e["id"] == current_gw), {})
+        gw_average = current_event.get("average_entry_score", 0)
         players = {p["id"]: p["web_name"] for p in data.get("elements", [])}
 
         print(f"Debug: GW {current_gw} detected")
-        return current_gw, players
+        return current_gw, gw_average, players
 
     except Exception as e:
         raise Exception(f"Bootstrap failed: {e}")
@@ -267,7 +267,34 @@ def format_rank(value):
         return f"#{value}"
 
 
-def build_summary_html(standings, gw):
+def build_trophy_cabinet_html():
+    rows = []
+
+    for champion in PAST_CHAMPIONS:
+        points = champion.get("points")
+        points_label = f" • {format_number(points)} pts" if points else ""
+        rows.append(
+            "<li>"
+            f"<span>{escape(champion['season'])}</span>"
+            f"<strong>{escape(champion['manager'])}</strong>"
+            f"<small>{escape(champion['team'])}{points_label}</small>"
+            "</li>"
+        )
+
+    return f"""
+          <details class="trophy-cabinet">
+            <summary>Trophy Cabinet</summary>
+            <div class="trophy-cabinet-panel">
+              <ul>
+                {''.join(rows)}
+              </ul>
+              <p>Back-to-back champion. The group chat remembers.</p>
+            </div>
+          </details>
+"""
+
+
+def build_summary_html(standings, gw, gw_average):
     if not standings:
         return ""
 
@@ -289,12 +316,6 @@ def build_summary_html(standings, gw):
       <small>Season {ACTIVE_SEASON}</small>
     </article>
 
-    <article class="metric-card previous-champion-card">
-      <span class="metric-label">{PREVIOUS_CHAMPION['season']} Champion</span>
-      <strong>{PREVIOUS_CHAMPION['manager']}</strong>
-      <small>{PREVIOUS_CHAMPION['team']} • {format_number(PREVIOUS_CHAMPION['points'])} pts</small>
-    </article>
-
     <article class="metric-card accent-gold">
       <span class="metric-label">Leader</span>
       <strong>{leader['emoji']} {escape(leader['team'])}</strong>
@@ -311,6 +332,12 @@ def build_summary_html(standings, gw):
       <span class="metric-label">Best GW</span>
       <strong>{best_gw['gw']} pts</strong>
       <small>{escape(best_gw['manager'])} this week</small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-label">GW Average</span>
+      <strong>{gw_average} pts</strong>
+      <small>FPL benchmark</small>
     </article>
 
     <article class="metric-card wide">
@@ -717,6 +744,89 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-color: transparent;
     }}
 
+    .trophy-cabinet {{
+      position: relative;
+    }}
+
+    .trophy-cabinet summary {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 9px 12px;
+      border: 1px solid rgba(245,200,76,0.35);
+      border-radius: 999px;
+      background: rgba(245,200,76,0.10);
+      color: var(--gold);
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      list-style: none;
+      text-transform: uppercase;
+    }}
+
+    .trophy-cabinet summary::-webkit-details-marker {{
+      display: none;
+    }}
+
+    .trophy-cabinet summary::after {{
+      content: '▾';
+      margin-left: 8px;
+      font-size: 0.82rem;
+    }}
+
+    .trophy-cabinet[open] summary::after {{
+      content: '▴';
+    }}
+
+    .trophy-cabinet-panel {{
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      z-index: 10;
+      width: min(340px, calc(100vw - 32px));
+      padding: 14px;
+      border: 1px solid rgba(245,200,76,0.32);
+      border-radius: 8px;
+      background: rgba(8, 11, 19, 0.98);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    }}
+
+    .trophy-cabinet ul {{
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }}
+
+    .trophy-cabinet li {{
+      display: grid;
+      gap: 3px;
+    }}
+
+    .trophy-cabinet li span {{
+      color: var(--cyan);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }}
+
+    .trophy-cabinet li strong {{
+      font-size: 1.1rem;
+    }}
+
+    .trophy-cabinet li small {{
+      color: var(--muted);
+    }}
+
+    .trophy-cabinet p {{
+      margin-top: 12px;
+      color: var(--rose);
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }}
+
     .summary-grid {{
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1057,6 +1167,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         text-align: center;
       }}
 
+      .trophy-cabinet,
+      .trophy-cabinet summary {{
+        width: 100%;
+      }}
+
+      .trophy-cabinet summary {{
+        justify-content: center;
+      }}
+
+      .trophy-cabinet-panel {{
+        left: 0;
+        right: auto;
+        width: 100%;
+      }}
+
       .summary-grid,
       .insight-grid,
       .container {{
@@ -1107,6 +1232,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span class="status-pill">Last scanned: {timestamp}</span>
           <span class="status-pill">Updates 9 AM & 9 PM Eastern</span>
           <span class="status-pill">Manual refresh by WhatsApp request</span>
+          {trophy_html}
         </div>
       </div>
     </section>
@@ -1205,7 +1331,7 @@ CARD_TEMPLATE = """
 
 
 # ====================== HTML GENERATION ======================
-def generate_html(gw, players, managers, history_chart_html):
+def generate_html(gw, gw_average, players, managers, history_chart_html):
     cards = []
     standings = []
 
@@ -1303,10 +1429,12 @@ def generate_html(gw, players, managers, history_chart_html):
           <td><span class="{chip_class}">{s['chip']}</span></td>
         </tr>"""
 
-    summary_html = build_summary_html(standings, gw)
+    summary_html = build_summary_html(standings, gw, gw_average)
+    trophy_html = build_trophy_cabinet_html()
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
+        trophy_html=trophy_html,
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
@@ -1324,13 +1452,13 @@ if __name__ == "__main__":
     print("Generating Clash of Captains Dashboard...")
 
     try:
-        gw, players = get_bootstrap_data()
+        gw, gw_average, players = get_bootstrap_data()
         managers = get_league_managers()
 
         print(f"Gameweek: {gw}")
 
         history_chart_html = generate_history_chart(managers, gw)
-        generate_html(gw, players, managers, history_chart_html)
+        generate_html(gw, gw_average, players, managers, history_chart_html)
 
     except Exception as e:
         print(f"Error: {e}")
