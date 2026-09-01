@@ -1091,6 +1091,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       padding: 0;
     }}
 
+    .standings-mobile-list {{
+      display: none;
+    }}
+
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -1409,6 +1413,88 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         grid-template-columns: 1fr;
       }}
 
+      .league-table {{
+        overflow-x: visible;
+      }}
+
+      .league-table table {{
+        display: none;
+      }}
+
+      .standings-mobile-list {{
+        display: grid;
+        gap: 12px;
+      }}
+
+      .standing-mobile-card {{
+        display: grid;
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.045);
+      }}
+
+      .standing-mobile-card.yours {{
+        border-color: rgba(245,200,76,0.44);
+        background: rgba(245,200,76,0.075);
+      }}
+
+      .standing-mobile-head {{
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+      }}
+
+      .standing-mobile-team {{
+        min-width: 0;
+      }}
+
+      .standing-mobile-team strong {{
+        display: block;
+        color: var(--text);
+        font-size: 0.98rem;
+        line-height: 1.2;
+      }}
+
+      .standing-mobile-team small {{
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }}
+
+      .standing-mobile-stats {{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }}
+
+      .standing-mobile-stat {{
+        min-height: 62px;
+        padding: 10px;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        background: rgba(0,0,0,0.18);
+      }}
+
+      .standing-mobile-stat span {{
+        display: block;
+        color: var(--cyan);
+        font-size: 0.64rem;
+        font-weight: 800;
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+      }}
+
+      .standing-mobile-stat strong {{
+        display: block;
+        margin-top: 6px;
+        color: var(--text);
+        font-size: 0.96rem;
+      }}
+
       .metric-card.wide {{
         grid-column: auto;
       }}
@@ -1480,6 +1566,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </thead>
         <tbody>{standings_html}</tbody>
       </table>
+      <div class="standings-mobile-list">
+        {standings_mobile_html}
+      </div>
     </section>
 
     <section class="section-panel history-chart-box">
@@ -1630,6 +1719,7 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
     standings.sort(key=lambda x: int(x.get("league_rank") or 999999))
 
     standings_html = ""
+    standings_mobile_html = ""
     leader_total = standings[0]["total"] if standings else 0
 
     for s in standings:
@@ -1651,6 +1741,36 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
           <td><span class="{chip_class}">{s['chip']}</span></td>
         </tr>"""
 
+        standings_mobile_html += f"""
+        <article class="standing-mobile-card{' yours' if s['yours'] else ''}">
+          <div class="standing-mobile-head">
+            <span class="rank-badge">#{league_rank}</span>
+            <div class="standing-mobile-team">
+              <strong>{s['emoji']} {escape(s['team'])}</strong>
+              <small>{escape(s['manager'])}</small>
+            </div>
+          </div>
+          <div class="standing-mobile-stats">
+            <div class="standing-mobile-stat">
+              <span>Total</span>
+              <strong>{format_number(s['total'])}</strong>
+            </div>
+            <div class="standing-mobile-stat">
+              <span>GW</span>
+              <strong>{s['gw']}</strong>
+            </div>
+            <div class="standing-mobile-stat">
+              <span>Gap</span>
+              <strong>{gap_label}</strong>
+            </div>
+            <div class="standing-mobile-stat">
+              <span>Live Rank</span>
+              <strong>{format_rank(s['rank'])}</strong>
+            </div>
+          </div>
+          <span class="{chip_class}">{s['chip']}</span>
+        </article>"""
+
     summary_html = build_summary_html(standings, gw, gw_average)
     trophy_html = build_trophy_cabinet_html()
     archive_html = build_rivalry_archive_html(managers)
@@ -1662,6 +1782,7 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
+        standings_mobile_html=standings_mobile_html,
         history_chart_html=history_chart_html
     )
 
