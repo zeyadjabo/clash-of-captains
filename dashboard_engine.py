@@ -16,9 +16,9 @@ OUTPUT_FILE = "index.html"
 ACTIVE_SEASON = "2026/2027"
 ARCHIVE_SEASONS = ["2025/26", "2024/25", "2023/24"]
 PAST_CHAMPIONS = [
-    {"season": "2025/2026", "manager": "Zee", "team": "Sesko n Destroy", "points": 2223},
-    {"season": "2024/2025", "manager": "Zee", "team": "Cunha Matata", "points": None},
-    {"season": "2023/2024", "manager": "No record", "team": "No record", "points": None}
+    {"season": "2025/2026", "manager": "Zee", "points": 2223},
+    {"season": "2024/2025", "manager": "Zee", "points": 2431},
+    {"season": "2023/2024", "manager": "Sam", "points": 2350}
 ]
 
 
@@ -294,7 +294,6 @@ def build_trophy_cabinet_html():
             "<tr>"
             f"<td>{escape(champion['season'])}</td>"
             f"<td>{escape(champion['manager'])}</td>"
-            f"<td>{escape(champion['team'])}</td>"
             f"<td>{format_number(points) if points else '-'}</td>"
             "</tr>"
         )
@@ -309,7 +308,6 @@ def build_trophy_cabinet_html():
                   <tr>
                     <th>Season</th>
                     <th>Champion</th>
-                    <th>Team</th>
                     <th>Points</th>
                   </tr>
                 </thead>
@@ -882,7 +880,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .trophy-cabinet-panel,
     .rivalry-archive-panel {{
       position: absolute;
-      right: 0;
+      left: 0;
+      right: auto;
       top: calc(100% + 10px);
       z-index: 30;
       width: min(520px, calc(100vw - 32px));
