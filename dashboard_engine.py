@@ -668,7 +668,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .hero-copy {{
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       border-radius: 8px;
       padding: clamp(28px, 5vw, 54px);
       display: flex;
