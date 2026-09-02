@@ -1253,10 +1253,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-transform: uppercase;
     }}
 
-    .card.yours {{
-      border-color: rgba(245,200,76,0.48);
-    }}
-
     .transfer-list {{
       list-style: none;
       padding: 0;
@@ -1630,7 +1626,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 # ====================== CARD TEMPLATE ======================
 CARD_TEMPLATE = """
-<div class="card {yours_class}">
+<div class="card">
   <h2>
     {team} <small style="color:#888;">({manager})</small>
   </h2>
@@ -1685,7 +1681,6 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
         )
 
         cards.append(CARD_TEMPLATE.format(
-            yours_class="yours" if info["yours"] else "",
             team=escape(info["team"]),
             manager=escape(info["name"]),
             transfers_html=transfers_html
@@ -1722,16 +1717,16 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
     standings_mobile_html = ""
     leader_total = standings[0]["total"] if standings else 0
 
-    for s in standings:
+    for index, s in enumerate(standings, 1):
         row_class = ' class="yours"' if s["yours"] else ""
         gap = leader_total - s["total"]
         gap_label = "Leader" if gap == 0 else f"-{gap}"
         chip_class = "chip none" if s["chip"] == "None" else "chip"
-        league_rank = s.get("league_rank") or "-"
+        local_rank = index
 
         standings_html += f"""
         <tr{row_class}>
-          <td><span class="rank-badge">#{league_rank}</span></td>
+          <td><span class="rank-badge">#{local_rank}</span></td>
           <td>{s['emoji']} {escape(s['team'])}</td>
           <td>{escape(s['manager'])}</td>
           <td class="num"><strong>{format_number(s['total'])}</strong></td>
@@ -1744,7 +1739,7 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
         standings_mobile_html += f"""
         <article class="standing-mobile-card{' yours' if s['yours'] else ''}">
           <div class="standing-mobile-head">
-            <span class="rank-badge">#{league_rank}</span>
+            <span class="rank-badge">#{local_rank}</span>
             <div class="standing-mobile-team">
               <strong>{s['emoji']} {escape(s['team'])}</strong>
               <small>{escape(s['manager'])}</small>
