@@ -1617,7 +1617,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }});
     }}
 
+    function syncHeroDropdowns() {{
+      var dropdowns = document.querySelectorAll(".trophy-cabinet, .rivalry-archive");
+
+      dropdowns.forEach(function(dropdown) {{
+        dropdown.addEventListener("toggle", function() {{
+          if (!dropdown.open) return;
+
+          dropdowns.forEach(function(otherDropdown) {{
+            if (otherDropdown !== dropdown) {{
+              otherDropdown.open = false;
+            }}
+          }});
+        }});
+      }});
+    }}
     window.addEventListener("load", tuneHistoryChart);
+    window.addEventListener("load", syncHeroDropdowns);
     window.addEventListener("resize", tuneHistoryChart);
   </script>
 </body>
@@ -1802,3 +1818,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Error: {e}")
+
