@@ -690,6 +690,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Track the Clash of Captains Fantasy Premier League mini-league with live standings, weekly transfers, rank history, and captain insights.">
   <title>Clash of Captains - FPL Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
