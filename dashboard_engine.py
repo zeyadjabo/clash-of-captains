@@ -250,14 +250,12 @@ def generate_history_chart(managers, current_gw):
 
         print("\nHistory chart created successfully!")
 
-        return fig.to_html(
-            full_html=False,
-            include_plotlyjs="cdn",
-            config={
-                "responsive": True,
-                "displayModeBar": False
-            }
-        )
+        chart_json = fig.to_json().replace("</", "<\\/")
+
+        return f"""
+        <div id="history-chart" class="plotly-graph-div" style="height:680px; width:100%;"></div>
+        <script id="history-chart-json" type="application/json">{chart_json}</script>
+        """
 
     print("No history data loaded.")
     return '<p class="empty-chart-note">Rank history starts once GW1 data is fully processed.</p>'
@@ -1586,20 +1584,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </main>
 
   <script>
-    function tuneHistoryChart() {{
-      if (!window.Plotly) return;
+    var plotlyLoadPromise;
 
-      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
-      if (!chart) return;
-
+    function getHistoryChartLayout() {{
       var mobile = window.matchMedia("(max-width: 768px)").matches;
 
-      Plotly.restyle(chart, {{
-        "line.width": mobile ? 2 : 3,
-        "marker.size": mobile ? 4 : 6
-      }});
-
-      Plotly.relayout(chart, {{
+      return {{
         height: mobile ? 500 : 660,
         margin: mobile
           ? {{ l: 44, r: 8, t: 76, b: 46 }}
@@ -1614,7 +1604,79 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         "xaxis.dtick": mobile ? 4 : 1,
         "xaxis.title.text": mobile ? "GW" : "Gameweek",
         "yaxis.title.text": mobile ? "Rank" : "Overall Rank"
+      }};
+    }}
+
+    function tuneHistoryChart() {{
+      if (!window.Plotly) return;
+
+      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
+      if (!chart || !chart.dataset.rendered) return;
+
+      var mobile = window.matchMedia("(max-width: 768px)").matches;
+
+      Plotly.restyle(chart, {{
+        "line.width": mobile ? 2 : 3,
+        "marker.size": mobile ? 4 : 6
       }});
+
+      Plotly.relayout(chart, getHistoryChartLayout());
+    }}
+
+    function loadPlotly() {{
+      if (window.Plotly) return Promise.resolve();
+      if (plotlyLoadPromise) return plotlyLoadPromise;
+
+      plotlyLoadPromise = new Promise(function(resolve, reject) {{
+        var script = document.createElement("script");
+        script.src = "https://cdn.plot.ly/plotly-4.0.0.min.js";
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      }});
+
+      return plotlyLoadPromise;
+    }}
+
+    function renderHistoryChart() {{
+      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
+      var payload = document.getElementById("history-chart-json");
+      if (!chart || !payload || chart.dataset.rendered) return;
+
+      loadPlotly().then(function() {{
+        var figure = JSON.parse(payload.textContent);
+        figure.layout = Object.assign({{}}, figure.layout, getHistoryChartLayout());
+
+        Plotly.newPlot(chart, figure.data, figure.layout, {{
+          responsive: true,
+          displayModeBar: false
+        }}).then(function() {{
+          chart.dataset.rendered = "true";
+          tuneHistoryChart();
+        }});
+      }});
+    }}
+
+    function initHistoryChart() {{
+      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
+      if (!chart) return;
+
+      if ("IntersectionObserver" in window) {{
+        var observer = new IntersectionObserver(function(entries) {{
+          entries.forEach(function(entry) {{
+            if (entry.isIntersecting) {{
+              observer.disconnect();
+              renderHistoryChart();
+            }}
+          }});
+        }}, {{ rootMargin: "320px 0px" }});
+
+        observer.observe(chart);
+        return;
+      }}
+
+      renderHistoryChart();
     }}
 
     function syncHeroDropdowns() {{
@@ -1632,7 +1694,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }});
       }});
     }}
-    window.addEventListener("load", tuneHistoryChart);
+    window.addEventListener("load", initHistoryChart);
     window.addEventListener("load", syncHeroDropdowns);
     window.addEventListener("resize", tuneHistoryChart);
   </script>
