@@ -870,13 +870,121 @@
       background: rgba(255,255,255,0.06);
     }
 
+    .history-chart-box {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .chart-toolbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+
+    .chart-legend {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      min-width: 0;
+      flex: 1;
+      border: 0;
+    }
+
+    .chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-height: 44px;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .chart-legend-item input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      accent-color: var(--manager-color);
+    }
+
+    .chart-legend-item strong,
+    .chart-legend-item small {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .chart-legend-item strong { font-size: var(--text-sm); }
+    .chart-legend-item small { font-size: var(--text-xs); color: var(--muted); }
+    .chart-legend-item > span { min-width: 0; }
+
+    .chart-frame {
+      height: 380px;
+      min-width: 0;
+      background: var(--panel);
+    }
+
     .history-chart-box .plotly-graph-div {
       width: 100% !important;
-      height: 660px !important;
+      height: 100% !important;
       min-height: 0;
-      border-radius: 8px;
-      background: #090d16;
-      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    @media (pointer: coarse) {
+      .history-chart-box .draglayer { pointer-events: none; }
+    }
+
+    .chart-state {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--muted);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-3);
+    }
+
+    .chart-state:has(#chart-status:empty) { display: none; }
+
+    .chart-retry {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      cursor: pointer;
+    }
+
+    .chart-selection { margin-top: var(--space-4); }
+    .chart-selection h3 { font-size: var(--text-xs); color: var(--muted); font-weight: 500; }
+
+    .chart-ranks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+    }
+
+    .chart-ranks dt { font-size: var(--text-xs); color: var(--muted); }
+    .chart-ranks dd { font-size: var(--text-sm); font-weight: 600; overflow-wrap: anywhere; }
+
+    .chart-data { margin-top: var(--space-4); }
+    .chart-data summary { min-height: 44px; padding: var(--space-3) 0; cursor: pointer; font-size: var(--text-sm); }
+    .rank-data-list { list-style: none; max-height: 320px; overflow: auto; overscroll-behavior: contain; }
+    .rank-data-list li { padding: var(--space-3) 0; border-top: 1px solid var(--line); }
+    .rank-data-list h4 { font-size: var(--text-xs); color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .chart-toolbar { display: block; }
+      .chart-legend { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+      .chart-frame { height: 300px; }
+      .rank-data-list .chart-ranks { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+      .rank-data-list .chart-ranks > div { display: flex; justify-content: space-between; gap: var(--space-2); }
     }
 
     .empty-chart-note {
@@ -1204,9 +1312,7 @@
         display: block;
       }
 
-      .history-chart-box .plotly-graph-div {
-        height: 500px !important;
-      }
+      .history-chart-box { padding: 0; }
 
       th,
       td {
@@ -1378,7 +1484,16 @@
       <div class="section-heading">
         <h2>Historical rank progress</h2>
       </div>
-      <div id="history-chart" class="plotly-graph-div" style="height:680px; width:100%;"></div><script id="history-chart-json" type="application/json">{"data": [{"line": {"width": 3}, "marker": {"size": 6}, "mode": "lines+markers", "name": "Spreadsheet FC (Sam)", "x": [1, 2, 3, 4, 5], "y": [344108, 98784, 86926, 32272, 30148], "type": "scatter"}, {"line": {"width": 3}, "marker": {"size": 6}, "mode": "lines+markers", "name": "Ugarte to Be Kidding (Joey)", "x": [1, 2, 3, 4, 5], "y": [7094513, 2815476, 2462198, 965603, 866712], "type": "scatter"}, {"line": {"width": 3}, "marker": {"size": 6}, "mode": "lines+markers", "name": "Cunha Matata (Zee)", "x": [1, 2, 3, 4, 5], "y": [2935782, 1833689, 2346231, 3623130, 3901125], "type": "scatter"}], "layout": {"template": {"data": {"barpolar": [{"marker": {"line": {"color": "rgb(17,17,17)", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "bar": [{"error_x": {"color": "#f2f5fa"}, "error_y": {"color": "#f2f5fa"}, "marker": {"line": {"color": "rgb(17,17,17)", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "carpet": [{"aaxis": {"endlinecolor": "#A2B1C6", "gridcolor": "#506784", "linecolor": "#506784", "minorgridcolor": "#506784", "startlinecolor": "#A2B1C6"}, "baxis": {"endlinecolor": "#A2B1C6", "gridcolor": "#506784", "linecolor": "#506784", "minorgridcolor": "#506784", "startlinecolor": "#A2B1C6"}, "type": "carpet"}], "choropleth": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "choropleth"}], "contourcarpet": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "contourcarpet"}], "contour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "type": "contour"}], "heatmap": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "type": "heatmap"}], "histogram2dcontour": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "type": "histogram2dcontour"}], "histogram2d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "type": "histogram2d"}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "mesh3d": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "type": "mesh3d"}], "parcoords": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "parcoords"}], "pie": [{"automargin": true, "type": "pie"}], "scatter3d": [{"line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatter3d"}], "scattercarpet": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattercarpet"}], "scattergeo": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattergeo"}], "scattergl": [{"marker": {"line": {"color": "#283442"}}, "type": "scattergl"}], "scattermap": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scattermap"}], "scatterpolargl": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolargl"}], "scatterpolar": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterpolar"}], "scatter": [{"marker": {"line": {"color": "#283442"}}, "type": "scatter"}], "scatterternary": [{"marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "type": "scatterternary"}], "surface": [{"colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "type": "surface"}], "table": [{"cells": {"fill": {"color": "#506784"}, "line": {"color": "rgb(17,17,17)"}}, "header": {"fill": {"color": "#2a3f5f"}, "line": {"color": "rgb(17,17,17)"}}, "type": "table"}]}, "layout": {"annotationdefaults": {"arrowcolor": "#f2f5fa", "arrowhead": 0, "arrowwidth": 1}, "autotypenumbers": "strict", "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]], "sequential": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]], "sequentialminus": [[0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1, "#f0f921"]]}, "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#f2f5fa"}, "geo": {"bgcolor": "rgb(17,17,17)", "lakecolor": "rgb(17,17,17)", "landcolor": "rgb(17,17,17)", "showlakes": true, "showland": true, "subunitcolor": "#506784"}, "hoverlabel": {"align": "left"}, "hovermode": "closest", "paper_bgcolor": "rgb(17,17,17)", "plot_bgcolor": "rgb(17,17,17)", "polar": {"angularaxis": {"gridcolor": "#506784", "linecolor": "#506784", "ticks": ""}, "bgcolor": "rgb(17,17,17)", "radialaxis": {"gridcolor": "#506784", "linecolor": "#506784", "ticks": ""}}, "scene": {"xaxis": {"backgroundcolor": "rgb(17,17,17)", "gridcolor": "#506784", "gridwidth": 2, "linecolor": "#506784", "showbackground": true, "ticks": "", "zerolinecolor": "#C8D4E3"}, "yaxis": {"backgroundcolor": "rgb(17,17,17)", "gridcolor": "#506784", "gridwidth": 2, "linecolor": "#506784", "showbackground": true, "ticks": "", "zerolinecolor": "#C8D4E3"}, "zaxis": {"backgroundcolor": "rgb(17,17,17)", "gridcolor": "#506784", "gridwidth": 2, "linecolor": "#506784", "showbackground": true, "ticks": "", "zerolinecolor": "#C8D4E3"}}, "shapedefaults": {"line": {"color": "#f2f5fa"}}, "sliderdefaults": {"bgcolor": "#C8D4E3", "bordercolor": "rgb(17,17,17)", "borderwidth": 1, "tickwidth": 0}, "ternary": {"aaxis": {"gridcolor": "#506784", "linecolor": "#506784", "ticks": ""}, "baxis": {"gridcolor": "#506784", "linecolor": "#506784", "ticks": ""}, "bgcolor": "rgb(17,17,17)", "caxis": {"gridcolor": "#506784", "linecolor": "#506784", "ticks": ""}}, "title": {"x": 0.05}, "updatemenudefaults": {"bgcolor": "#506784", "borderwidth": 0}, "xaxis": {"automargin": true, "gridcolor": "#283442", "linecolor": "#506784", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#283442", "zerolinewidth": 2}, "yaxis": {"automargin": true, "gridcolor": "#283442", "linecolor": "#506784", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "#283442", "zerolinewidth": 2}}}, "margin": {"l": 70, "r": 20, "t": 96, "b": 60}, "legend": {"orientation": "h", "yanchor": "bottom", "y": 1.04, "xanchor": "left", "x": 0}, "yaxis": {"title": {"text": "Overall Rank"}, "autorange": "reversed", "tickformat": ","}, "xaxis": {"title": {"text": "Gameweek"}, "tickmode": "linear", "dtick": 1, "range": [1, 10]}, "autosize": true, "height": 680}}</script>
+      <div class="rank-history" data-current-gw="5" data-selected-gw="5">
+        <div class="chart-toolbar">
+          <fieldset class="chart-legend"><legend class="sr-only">Managers shown</legend><label class="chart-legend-item" data-manager="sam"><input type="checkbox" checked disabled data-chart-trace="0" aria-label="Show Sam"><span><strong>Sam</strong><small>Spreadsheet FC</small></span></label><label class="chart-legend-item" data-manager="joey"><input type="checkbox" checked disabled data-chart-trace="1" aria-label="Show Joey"><span><strong>Joey</strong><small>Ugarte to Be Kidding</small></span></label><label class="chart-legend-item" data-manager="zee"><input type="checkbox" checked disabled data-chart-trace="2" aria-label="Show Zee"><span><strong>Zee</strong><small>Cunha Matata</small></span></label></fieldset>
+        </div>
+        <div class="chart-state"><p id="chart-status" role="status">Interactive chart unavailable.</p><button class="chart-retry" type="button" hidden aria-label="Retry chart" title="Retry chart"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button></div>
+        <div class="chart-frame" hidden><div id="history-chart" class="plotly-graph-div" role="img" aria-label="Overall rank by gameweek, lower ranks are better" aria-describedby="chart-selected-heading"></div></div>
+        <div class="chart-selection"><h3 id="chart-selected-heading">GW5 overall ranks</h3><dl class="chart-ranks chart-selected-ranks" aria-live="polite"><div data-chart-manager="sam"><dt>Sam</dt><dd>#30,148</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#866,712</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#3,901,125</dd></div></dl></div>
+        <details class="chart-data"><summary>Rank data</summary><ul class="rank-data-list" tabindex="0" aria-label="Recorded gameweek ranks"><li><h4>GW1</h4><dl class="chart-ranks"><div data-chart-manager="sam"><dt>Sam</dt><dd>#344,108</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#7,094,513</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#2,935,782</dd></div></dl></li><li><h4>GW2</h4><dl class="chart-ranks"><div data-chart-manager="sam"><dt>Sam</dt><dd>#98,784</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#2,815,476</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#1,833,689</dd></div></dl></li><li><h4>GW3</h4><dl class="chart-ranks"><div data-chart-manager="sam"><dt>Sam</dt><dd>#86,926</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#2,462,198</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#2,346,231</dd></div></dl></li><li><h4>GW4</h4><dl class="chart-ranks"><div data-chart-manager="sam"><dt>Sam</dt><dd>#32,272</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#965,603</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#3,623,130</dd></div></dl></li><li><h4>GW5</h4><dl class="chart-ranks"><div data-chart-manager="sam"><dt>Sam</dt><dd>#30,148</dd></div><div data-chart-manager="joey"><dt>Joey</dt><dd>#866,712</dd></div><div data-chart-manager="zee"><dt>Zee</dt><dd>#3,901,125</dd></div></dl></li></ul></details>
+      </div>
+      <script id="history-chart-json" type="application/json">{"data":[{"line":{"width":3},"marker":{"size":6},"mode":"lines+markers","name":"Spreadsheet FC (Sam)","x":[1,2,3,4,5],"y":[344108,98784,86926,32272,30148],"type":"scatter","meta":{"manager":"sam"},"cliponaxis":false},{"line":{"width":3},"marker":{"size":6},"mode":"lines+markers","name":"Ugarte to Be Kidding (Joey)","x":[1,2,3,4,5],"y":[7094513,2815476,2462198,965603,866712],"type":"scatter","meta":{"manager":"joey"},"cliponaxis":false},{"line":{"width":3},"marker":{"size":6},"mode":"lines+markers","name":"Cunha Matata (Zee)","x":[1,2,3,4,5],"y":[2935782,1833689,2346231,3623130,3901125],"type":"scatter","meta":{"manager":"zee"},"cliponaxis":false}],"layout":{"autosize":true,"height":680,"legend":{"orientation":"h","x":0,"xanchor":"left","y":1.04,"yanchor":"bottom"},"margin":{"b":60,"l":70,"r":20,"t":96},"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]],"sequentialminus":[[0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"xaxis":{"dtick":1,"range":[1,10],"tickmode":"linear","title":{"text":"Gameweek"}},"yaxis":{"autorange":"reversed","tickformat":",","title":{"text":"Overall Rank"}},"showlegend":false}}</script>
     </section>
 
     <section class="transfers-section" id="gameweek-movement" tabindex="-1" aria-labelledby="movement-heading">
@@ -1443,42 +1558,78 @@
 
   <script>
     var plotlyLoadPromise;
+    var historyFigure;
+    var historyResizeTimer;
 
     function getHistoryChartLayout() {
       var mobile = window.matchMedia("(max-width: 768px)").matches;
-
+      var frame = document.querySelector(".chart-frame");
+      var root = document.querySelector(".rank-history");
+      var horizon = Math.min(Number(root.dataset.currentGw) + 5, 38);
+      var width = frame.clientWidth;
+      var budget = Math.max(2, Math.floor((width - 84) / 48));
+      var step = [1, 2, 4, 6, 8, 12, 20].find(function(value) { return Math.ceil(horizon / value) <= budget; }) || 20;
+      var ticks = [1];
+      for (var gw = 1 + step; gw < horizon; gw += step) {
+        if (horizon - gw >= step * 0.65) ticks.push(gw);
+      }
+      ticks.push(horizon);
+      var style = getComputedStyle(document.body);
       return {
-        height: mobile ? 500 : 660,
-        margin: mobile
-          ? { l: 44, r: 8, t: 76, b: 46 }
-          : { l: 70, r: 20, t: 96, b: 60 },
-        font: { size: mobile ? 10 : 12 },
-        "title.font.size": mobile ? 13 : 18,
-        "legend.orientation": "h",
-        "legend.x": 0,
-        "legend.y": mobile ? 1.14 : 1.04,
-        "legend.xanchor": "left",
-        "legend.yanchor": "bottom",
-        "xaxis.dtick": mobile ? 4 : 1,
-        "xaxis.title.text": mobile ? "GW" : "Gameweek",
-        "yaxis.title.text": mobile ? "Rank" : "Overall Rank"
+        autosize: true,
+        width: width,
+        height: frame.clientHeight,
+        margin: { l: mobile ? 60 : 96, r: 24, t: 16, b: 48 },
+        font: { family: style.fontFamily, size: mobile ? 11 : 12, color: style.getPropertyValue("--muted").trim() },
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+        showlegend: false, dragmode: false, hovermode: "x unified",
+        shapes: [historySelectionShape()],
+        hoverlabel: { bgcolor: style.getPropertyValue("--panel-strong").trim(), font: { size: 12 }, namelength: -1 },
+        xaxis: { range: [1, Math.max(horizon, 2)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: { text: "GW%{x}" }, title: { text: "Gameweek", font: { size: 12 } }, gridcolor: "rgba(255,255,255,0.08)", zeroline: false },
+        yaxis: { autorange: "reversed", tickformat: mobile ? "~s" : ",", automargin: true, fixedrange: true, title: { text: "Overall rank", font: { size: 12 }, standoff: 16 }, gridcolor: "rgba(255,255,255,0.12)", zeroline: false }
       };
     }
 
-    function tuneHistoryChart() {
-      if (!window.Plotly) return;
+    function historySelectionShape() {
+      var gw = Number(document.querySelector(".rank-history").dataset.selectedGw);
+      return { type: "line", xref: "x", yref: "paper", x0: gw, x1: gw, y0: 0, y1: 1, layer: "below", line: { color: "rgba(255,255,255,0.35)", width: 1, dash: "dot" } };
+    }
 
-      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
-      if (!chart || !chart.dataset.rendered) return;
-
-      var mobile = window.matchMedia("(max-width: 768px)").matches;
-
-      Plotly.restyle(chart, {
-        "line.width": mobile ? 2 : 3,
-        "marker.size": mobile ? 4 : 6
+    function selectHistoryRound(gw) {
+      document.querySelector(".rank-history").dataset.selectedGw = String(gw);
+      document.getElementById("chart-selected-heading").textContent = "GW" + gw + " overall ranks";
+      historyFigure.data.forEach(function(trace) {
+        var index = trace.x.indexOf(gw);
+        var node = document.querySelector('.chart-selected-ranks [data-chart-manager="' + trace.meta.manager + '"] dd');
+        node.textContent = index < 0 ? "No record" : "#" + Number(trace.y[index]).toLocaleString("en-US");
       });
+      var chart = document.getElementById("history-chart");
+      if (chart.dataset.rendered) {
+        Promise.resolve().then(function() { return Plotly.relayout(chart, { shapes: [historySelectionShape()] }); }).catch(historyChartFailed);
+      }
+    }
 
-      Plotly.relayout(chart, getHistoryChartLayout());
+    function historyChartFailed() {
+      var chart = document.getElementById("history-chart");
+      if (!chart) return;
+      chart.dataset.state = "error";
+      delete chart.dataset.rendered;
+      chart.setAttribute("aria-busy", "false");
+      document.querySelector(".chart-frame").hidden = true;
+      document.getElementById("chart-status").textContent = "Rank chart unavailable.";
+      document.querySelector(".chart-retry").hidden = false;
+      document.querySelectorAll("[data-chart-trace]").forEach(function(input) { input.disabled = true; });
+    }
+
+    function tuneHistoryChart() {
+      clearTimeout(historyResizeTimer);
+      historyResizeTimer = setTimeout(function() {
+        var chart = document.getElementById("history-chart");
+        if (!window.Plotly || !chart || !chart.dataset.rendered) return;
+        Promise.resolve().then(function() {
+          return Plotly.relayout(chart, getHistoryChartLayout());
+        }).then(function() { return Plotly.Plots.resize(chart); }).catch(historyChartFailed);
+      }, 100);
     }
 
     function loadPlotly() {
@@ -1489,36 +1640,95 @@
         var script = document.createElement("script");
         script.src = "https://cdn.plot.ly/plotly-4.0.0.min.js";
         script.defer = true;
-        script.onload = resolve;
-        script.onerror = reject;
+        var timer = setTimeout(function() { fail(); }, 12000);
+        function fail() {
+          clearTimeout(timer); script.remove(); reject(new Error("Plotly unavailable"));
+        }
+        script.onload = function() { clearTimeout(timer); window.Plotly ? resolve() : fail(); };
+        script.onerror = fail;
         document.head.appendChild(script);
-      });
+      }).catch(function(error) { plotlyLoadPromise = null; throw error; });
 
       return plotlyLoadPromise;
     }
 
     function renderHistoryChart() {
       var chart = document.querySelector(".history-chart-box .plotly-graph-div");
-      var payload = document.getElementById("history-chart-json");
-      if (!chart || !payload || chart.dataset.rendered) return;
-
+      if (!chart || !historyFigure || chart.dataset.rendered || chart.dataset.state === "loading") return;
+      chart.dataset.state = "loading";
+      chart.setAttribute("aria-busy", "true");
+      document.querySelector(".chart-frame").hidden = false;
+      document.getElementById("chart-status").textContent = "Loading rank chart...";
+      document.querySelector(".chart-retry").hidden = true;
       loadPlotly().then(function() {
-        var figure = JSON.parse(payload.textContent);
-        figure.layout = Object.assign({}, figure.layout, getHistoryChartLayout());
-
-        Plotly.newPlot(chart, figure.data, figure.layout, {
-          responsive: true,
-          displayModeBar: false
-        }).then(function() {
-          chart.dataset.rendered = "true";
-          tuneHistoryChart();
+        var traces = historyFigure.data.map(function(trace, index) {
+          var input = document.querySelector('[data-chart-trace="' + index + '"]');
+          var label = input.closest("label");
+          var manager = label.querySelector("strong").textContent;
+          var color = getComputedStyle(label).getPropertyValue("--manager-color").trim();
+          return Object.assign({}, trace, {
+            name: manager, visible: input.checked, cliponaxis: false,
+            line: { width: 2.5, color: color }, marker: { size: 5, color: color },
+            hovertemplate: manager + " · #%{y:,}<extra></extra>"
+          });
         });
-      });
+        return Plotly.newPlot(chart, traces, getHistoryChartLayout(), {
+          responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false
+        });
+      }).then(function() {
+        chart.dataset.rendered = "true";
+        chart.dataset.state = "ready";
+        chart.setAttribute("aria-busy", "false");
+        document.getElementById("chart-status").textContent = document.querySelector("[data-chart-trace]:checked") ? "" : "No managers selected.";
+        document.querySelectorAll("[data-chart-trace]").forEach(function(input) { input.disabled = false; });
+      }).catch(historyChartFailed);
     }
 
     function initHistoryChart() {
       var chart = document.querySelector(".history-chart-box .plotly-graph-div");
       if (!chart) return;
+      try {
+        historyFigure = JSON.parse(document.getElementById("history-chart-json").textContent);
+      } catch (error) { historyChartFailed(); return; }
+      var root = document.querySelector(".rank-history");
+      var press;
+      chart.addEventListener("pointerdown", function(event) {
+        if (event.button !== 0) return;
+        press = { x: event.clientX, y: event.clientY, id: event.pointerId };
+      }, true);
+      window.addEventListener("pointercancel", function() { press = null; }, true);
+      window.addEventListener("pointerup", function(event) {
+        var start = press;
+        press = null;
+        if (!start || start.id !== event.pointerId || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 10 || !chart.dataset.rendered) return;
+        var rect = chart.getBoundingClientRect();
+        var axes = chart._fullLayout;
+        var nearest;
+        var distance = 24;
+        chart.data.forEach(function(trace) {
+          if (trace.visible === false || trace.visible === "legendonly") return;
+          trace.x.forEach(function(gw, index) {
+            var x = rect.left + axes.xaxis._offset + axes.xaxis.d2p(gw);
+            var y = rect.top + axes.yaxis._offset + axes.yaxis.d2p(trace.y[index]);
+            var delta = Math.hypot(event.clientX - x, event.clientY - y);
+            if (delta < distance) { distance = delta; nearest = gw; }
+          });
+        });
+        if (nearest !== undefined) selectHistoryRound(nearest);
+      }, true);
+      document.querySelectorAll("[data-chart-trace]").forEach(function(input) {
+        input.addEventListener("change", function() {
+          var index = Number(input.dataset.chartTrace);
+          var manager = historyFigure.data[index].meta.manager;
+          document.querySelector('.chart-selected-ranks [data-chart-manager="' + manager + '"]').hidden = !input.checked;
+          document.getElementById("chart-status").textContent = document.querySelector("[data-chart-trace]:checked") ? "" : "No managers selected.";
+          Promise.resolve().then(function() { return Plotly.restyle(chart, { visible: input.checked }, [index]); }).catch(historyChartFailed);
+        });
+      });
+      document.querySelector(".chart-retry").addEventListener("click", renderHistoryChart);
+      document.querySelector(".chart-frame").hidden = false;
+      document.getElementById("chart-status").textContent = "Rank chart pending.";
+      if ("ResizeObserver" in window) new ResizeObserver(tuneHistoryChart).observe(document.querySelector(".chart-frame"));
 
       if ("IntersectionObserver" in window) {
         var observer = new IntersectionObserver(function(entries) {
@@ -1530,7 +1740,7 @@
           });
         }, { rootMargin: "320px 0px" });
 
-        observer.observe(chart);
+        observer.observe(root);
         return;
       }
 
@@ -1670,6 +1880,7 @@
     window.addEventListener("load", initHistoryChart);
     initHistoryDialog();
     window.addEventListener("resize", tuneHistoryChart);
+    window.addEventListener("orientationchange", tuneHistoryChart);
   </script>
 </body>
 </html>

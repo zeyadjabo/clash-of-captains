@@ -23,6 +23,7 @@ PAST_CHAMPIONS = [
 
 # Lucide icon paths (ISC); attribution is in assets/lucide-LICENSE.txt.
 UI_ICON_PATHS = {
+    "retry": '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>',
     "close": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     "trophy": (
         '<path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/>'
@@ -208,11 +209,62 @@ def get_manager_past_seasons(entry_id):
 
 
 # ====================== HISTORY CHART ======================
+def build_history_chart_html(fig, current_gw):
+    horizon = min(current_gw + 5, 38)
+    fig.update_layout(
+        showlegend=False,
+        yaxis=dict(autorange="reversed", tickformat=","),
+        xaxis=dict(range=[1, max(horizon, 2)]),
+    )
+    legend_items = []
+    series = []
+    for index, trace in enumerate(fig.data):
+        manager = next((profile["name"] for profile in TRACKED_MANAGERS.values()
+                        if trace.name.endswith(f"({profile['name']})")), trace.name)
+        team = trace.name.removesuffix(f" ({manager})")
+        trace.meta = {"manager": manager.lower()}
+        trace.cliponaxis = False
+        values = dict(zip(trace.x, trace.y))
+        series.append((manager, values))
+        legend_items.append(
+            f'<label class="chart-legend-item" data-manager="{escape(manager.lower(), quote=True)}">'
+            f'<input type="checkbox" checked disabled data-chart-trace="{index}" aria-label="Show {escape(manager, quote=True)}">'
+            f'<span><strong>{escape(manager)}</strong><small>{escape(team)}</small></span></label>'
+        )
+
+    payload = fig.to_json().replace("</", "<\\/")
+    if not series:
+        return '<p class="empty-chart-note">No recorded ranks yet.</p>' + f'<script id="history-chart-json" type="application/json">{payload}</script>'
+
+    rounds = sorted({gw for _, values in series for gw in values})
+    latest = rounds[-1]
+
+    def rank_readout(gw):
+        return "".join(
+            f'<div data-chart-manager="{escape(manager.lower(), quote=True)}"><dt>{escape(manager)}</dt>'
+            f'<dd>{format_rank(values[gw]) if gw in values else "No record"}</dd></div>'
+            for manager, values in series
+        )
+
+    data_rows = "".join(f'<li><h4>GW{gw}</h4><dl class="chart-ranks">{rank_readout(gw)}</dl></li>' for gw in rounds)
+    return f"""
+      <div class="rank-history" data-current-gw="{current_gw}" data-selected-gw="{latest}">
+        <div class="chart-toolbar">
+          <fieldset class="chart-legend"><legend class="sr-only">Managers shown</legend>{''.join(legend_items)}</fieldset>
+        </div>
+        <div class="chart-state"><p id="chart-status" role="status">Interactive chart unavailable.</p><button class="chart-retry" type="button" hidden aria-label="Retry chart" title="Retry chart">{ui_icon('retry')}</button></div>
+        <div class="chart-frame" hidden><div id="history-chart" class="plotly-graph-div" role="img" aria-label="Overall rank by gameweek, lower ranks are better" aria-describedby="chart-selected-heading"></div></div>
+        <div class="chart-selection"><h3 id="chart-selected-heading">GW{latest} overall ranks</h3><dl class="chart-ranks chart-selected-ranks" aria-live="polite">{rank_readout(latest)}</dl></div>
+        <details class="chart-data"><summary>Rank data</summary><ul class="rank-data-list" tabindex="0" aria-label="Recorded gameweek ranks">{data_rows}</ul></details>
+      </div>
+      <script id="history-chart-json" type="application/json">{payload}</script>
+    """.strip()
+
+
 def generate_history_chart(managers, current_gw):
     print("Fetching Overall Rank history...\n")
 
     fig = go.Figure()
-    display_until_gw = min(current_gw + 5, 38)
 
     for info in managers:
         entry_id = info["id"]
@@ -253,42 +305,10 @@ def generate_history_chart(managers, current_gw):
             print(f"No data for {info['team']}")
 
     if len(fig.data) > 0:
-        fig.update_layout(
-            xaxis_title="Gameweek",
-            yaxis_title="Overall Rank",
-            template="plotly_dark",
-            autosize=True,
-            height=680,
-            margin=dict(l=70, r=20, t=96, b=60),
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.04,
-                xanchor="left",
-                x=0
-            ),
-            yaxis=dict(
-                autorange="reversed",
-                tickformat=","
-            ),
-            xaxis=dict(
-                tickmode="linear",
-                dtick=1,
-                range=[1, max(display_until_gw, 2)]
-            )
-        )
-
         print("\nHistory chart created successfully!")
-
-        chart_json = fig.to_json().replace("</", "<\\/")
-
-        return f"""
-        <div id="history-chart" class="plotly-graph-div" style="height:680px; width:100%;"></div>
-        <script id="history-chart-json" type="application/json">{chart_json}</script>
-        """
-
-    print("No history data loaded.")
-    return '<p class="empty-chart-note">Rank history starts once GW1 data is fully processed.</p>'
+    else:
+        print("No history data loaded.")
+    return build_history_chart_html(fig, current_gw)
 
 
 # ====================== INSIGHTS ======================
@@ -1605,13 +1625,121 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       background: rgba(255,255,255,0.06);
     }}
 
+    .history-chart-box {{
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }}
+
+    .chart-toolbar {{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }}
+
+    .chart-legend {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      min-width: 0;
+      flex: 1;
+      border: 0;
+    }}
+
+    .chart-legend-item {{
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-height: 44px;
+      min-width: 0;
+      cursor: pointer;
+    }}
+
+    .chart-legend-item input {{
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      accent-color: var(--manager-color);
+    }}
+
+    .chart-legend-item strong,
+    .chart-legend-item small {{
+      display: block;
+      overflow-wrap: anywhere;
+    }}
+
+    .chart-legend-item strong {{ font-size: var(--text-sm); }}
+    .chart-legend-item small {{ font-size: var(--text-xs); color: var(--muted); }}
+    .chart-legend-item > span {{ min-width: 0; }}
+
+    .chart-frame {{
+      height: 380px;
+      min-width: 0;
+      background: var(--panel);
+    }}
+
     .history-chart-box .plotly-graph-div {{
       width: 100% !important;
-      height: 660px !important;
+      height: 100% !important;
       min-height: 0;
-      border-radius: 8px;
-      background: #090d16;
-      overflow: hidden;
+      touch-action: pan-y;
+    }}
+
+    @media (pointer: coarse) {{
+      .history-chart-box .draglayer {{ pointer-events: none; }}
+    }}
+
+    .chart-state {{
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--muted);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-3);
+    }}
+
+    .chart-state:has(#chart-status:empty) {{ display: none; }}
+
+    .chart-retry {{
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      cursor: pointer;
+    }}
+
+    .chart-selection {{ margin-top: var(--space-4); }}
+    .chart-selection h3 {{ font-size: var(--text-xs); color: var(--muted); font-weight: 500; }}
+
+    .chart-ranks {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+    }}
+
+    .chart-ranks dt {{ font-size: var(--text-xs); color: var(--muted); }}
+    .chart-ranks dd {{ font-size: var(--text-sm); font-weight: 600; overflow-wrap: anywhere; }}
+
+    .chart-data {{ margin-top: var(--space-4); }}
+    .chart-data summary {{ min-height: 44px; padding: var(--space-3) 0; cursor: pointer; font-size: var(--text-sm); }}
+    .rank-data-list {{ list-style: none; max-height: 320px; overflow: auto; overscroll-behavior: contain; }}
+    .rank-data-list li {{ padding: var(--space-3) 0; border-top: 1px solid var(--line); }}
+    .rank-data-list h4 {{ font-size: var(--text-xs); color: var(--muted); }}
+
+    @media (max-width: 768px) {{
+      .chart-toolbar {{ display: block; }}
+      .chart-legend {{ grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }}
+      .chart-frame {{ height: 300px; }}
+      .rank-data-list .chart-ranks {{ grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }}
+      .rank-data-list .chart-ranks > div {{ display: flex; justify-content: space-between; gap: var(--space-2); }}
     }}
 
     .empty-chart-note {{
@@ -1939,9 +2067,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         display: block;
       }}
 
-      .history-chart-box .plotly-graph-div {{
-        height: 500px !important;
-      }}
+      .history-chart-box {{ padding: 0; }}
 
       th,
       td {{
@@ -2043,42 +2169,78 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   <script>
     var plotlyLoadPromise;
+    var historyFigure;
+    var historyResizeTimer;
 
     function getHistoryChartLayout() {{
       var mobile = window.matchMedia("(max-width: 768px)").matches;
-
+      var frame = document.querySelector(".chart-frame");
+      var root = document.querySelector(".rank-history");
+      var horizon = Math.min(Number(root.dataset.currentGw) + 5, 38);
+      var width = frame.clientWidth;
+      var budget = Math.max(2, Math.floor((width - 84) / 48));
+      var step = [1, 2, 4, 6, 8, 12, 20].find(function(value) {{ return Math.ceil(horizon / value) <= budget; }}) || 20;
+      var ticks = [1];
+      for (var gw = 1 + step; gw < horizon; gw += step) {{
+        if (horizon - gw >= step * 0.65) ticks.push(gw);
+      }}
+      ticks.push(horizon);
+      var style = getComputedStyle(document.body);
       return {{
-        height: mobile ? 500 : 660,
-        margin: mobile
-          ? {{ l: 44, r: 8, t: 76, b: 46 }}
-          : {{ l: 70, r: 20, t: 96, b: 60 }},
-        font: {{ size: mobile ? 10 : 12 }},
-        "title.font.size": mobile ? 13 : 18,
-        "legend.orientation": "h",
-        "legend.x": 0,
-        "legend.y": mobile ? 1.14 : 1.04,
-        "legend.xanchor": "left",
-        "legend.yanchor": "bottom",
-        "xaxis.dtick": mobile ? 4 : 1,
-        "xaxis.title.text": mobile ? "GW" : "Gameweek",
-        "yaxis.title.text": mobile ? "Rank" : "Overall Rank"
+        autosize: true,
+        width: width,
+        height: frame.clientHeight,
+        margin: {{ l: mobile ? 60 : 96, r: 24, t: 16, b: 48 }},
+        font: {{ family: style.fontFamily, size: mobile ? 11 : 12, color: style.getPropertyValue("--muted").trim() }},
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+        showlegend: false, dragmode: false, hovermode: "x unified",
+        shapes: [historySelectionShape()],
+        hoverlabel: {{ bgcolor: style.getPropertyValue("--panel-strong").trim(), font: {{ size: 12 }}, namelength: -1 }},
+        xaxis: {{ range: [1, Math.max(horizon, 2)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: {{ text: "GW%{{x}}" }}, title: {{ text: "Gameweek", font: {{ size: 12 }} }}, gridcolor: "rgba(255,255,255,0.08)", zeroline: false }},
+        yaxis: {{ autorange: "reversed", tickformat: mobile ? "~s" : ",", automargin: true, fixedrange: true, title: {{ text: "Overall rank", font: {{ size: 12 }}, standoff: 16 }}, gridcolor: "rgba(255,255,255,0.12)", zeroline: false }}
       }};
     }}
 
-    function tuneHistoryChart() {{
-      if (!window.Plotly) return;
+    function historySelectionShape() {{
+      var gw = Number(document.querySelector(".rank-history").dataset.selectedGw);
+      return {{ type: "line", xref: "x", yref: "paper", x0: gw, x1: gw, y0: 0, y1: 1, layer: "below", line: {{ color: "rgba(255,255,255,0.35)", width: 1, dash: "dot" }} }};
+    }}
 
-      var chart = document.querySelector(".history-chart-box .plotly-graph-div");
-      if (!chart || !chart.dataset.rendered) return;
-
-      var mobile = window.matchMedia("(max-width: 768px)").matches;
-
-      Plotly.restyle(chart, {{
-        "line.width": mobile ? 2 : 3,
-        "marker.size": mobile ? 4 : 6
+    function selectHistoryRound(gw) {{
+      document.querySelector(".rank-history").dataset.selectedGw = String(gw);
+      document.getElementById("chart-selected-heading").textContent = "GW" + gw + " overall ranks";
+      historyFigure.data.forEach(function(trace) {{
+        var index = trace.x.indexOf(gw);
+        var node = document.querySelector('.chart-selected-ranks [data-chart-manager="' + trace.meta.manager + '"] dd');
+        node.textContent = index < 0 ? "No record" : "#" + Number(trace.y[index]).toLocaleString("en-US");
       }});
+      var chart = document.getElementById("history-chart");
+      if (chart.dataset.rendered) {{
+        Promise.resolve().then(function() {{ return Plotly.relayout(chart, {{ shapes: [historySelectionShape()] }}); }}).catch(historyChartFailed);
+      }}
+    }}
 
-      Plotly.relayout(chart, getHistoryChartLayout());
+    function historyChartFailed() {{
+      var chart = document.getElementById("history-chart");
+      if (!chart) return;
+      chart.dataset.state = "error";
+      delete chart.dataset.rendered;
+      chart.setAttribute("aria-busy", "false");
+      document.querySelector(".chart-frame").hidden = true;
+      document.getElementById("chart-status").textContent = "Rank chart unavailable.";
+      document.querySelector(".chart-retry").hidden = false;
+      document.querySelectorAll("[data-chart-trace]").forEach(function(input) {{ input.disabled = true; }});
+    }}
+
+    function tuneHistoryChart() {{
+      clearTimeout(historyResizeTimer);
+      historyResizeTimer = setTimeout(function() {{
+        var chart = document.getElementById("history-chart");
+        if (!window.Plotly || !chart || !chart.dataset.rendered) return;
+        Promise.resolve().then(function() {{
+          return Plotly.relayout(chart, getHistoryChartLayout());
+        }}).then(function() {{ return Plotly.Plots.resize(chart); }}).catch(historyChartFailed);
+      }}, 100);
     }}
 
     function loadPlotly() {{
@@ -2089,36 +2251,95 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         var script = document.createElement("script");
         script.src = "https://cdn.plot.ly/plotly-4.0.0.min.js";
         script.defer = true;
-        script.onload = resolve;
-        script.onerror = reject;
+        var timer = setTimeout(function() {{ fail(); }}, 12000);
+        function fail() {{
+          clearTimeout(timer); script.remove(); reject(new Error("Plotly unavailable"));
+        }}
+        script.onload = function() {{ clearTimeout(timer); window.Plotly ? resolve() : fail(); }};
+        script.onerror = fail;
         document.head.appendChild(script);
-      }});
+      }}).catch(function(error) {{ plotlyLoadPromise = null; throw error; }});
 
       return plotlyLoadPromise;
     }}
 
     function renderHistoryChart() {{
       var chart = document.querySelector(".history-chart-box .plotly-graph-div");
-      var payload = document.getElementById("history-chart-json");
-      if (!chart || !payload || chart.dataset.rendered) return;
-
+      if (!chart || !historyFigure || chart.dataset.rendered || chart.dataset.state === "loading") return;
+      chart.dataset.state = "loading";
+      chart.setAttribute("aria-busy", "true");
+      document.querySelector(".chart-frame").hidden = false;
+      document.getElementById("chart-status").textContent = "Loading rank chart...";
+      document.querySelector(".chart-retry").hidden = true;
       loadPlotly().then(function() {{
-        var figure = JSON.parse(payload.textContent);
-        figure.layout = Object.assign({{}}, figure.layout, getHistoryChartLayout());
-
-        Plotly.newPlot(chart, figure.data, figure.layout, {{
-          responsive: true,
-          displayModeBar: false
-        }}).then(function() {{
-          chart.dataset.rendered = "true";
-          tuneHistoryChart();
+        var traces = historyFigure.data.map(function(trace, index) {{
+          var input = document.querySelector('[data-chart-trace="' + index + '"]');
+          var label = input.closest("label");
+          var manager = label.querySelector("strong").textContent;
+          var color = getComputedStyle(label).getPropertyValue("--manager-color").trim();
+          return Object.assign({{}}, trace, {{
+            name: manager, visible: input.checked, cliponaxis: false,
+            line: {{ width: 2.5, color: color }}, marker: {{ size: 5, color: color }},
+            hovertemplate: manager + " · #%{{y:,}}<extra></extra>"
+          }});
         }});
-      }});
+        return Plotly.newPlot(chart, traces, getHistoryChartLayout(), {{
+          responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false
+        }});
+      }}).then(function() {{
+        chart.dataset.rendered = "true";
+        chart.dataset.state = "ready";
+        chart.setAttribute("aria-busy", "false");
+        document.getElementById("chart-status").textContent = document.querySelector("[data-chart-trace]:checked") ? "" : "No managers selected.";
+        document.querySelectorAll("[data-chart-trace]").forEach(function(input) {{ input.disabled = false; }});
+      }}).catch(historyChartFailed);
     }}
 
     function initHistoryChart() {{
       var chart = document.querySelector(".history-chart-box .plotly-graph-div");
       if (!chart) return;
+      try {{
+        historyFigure = JSON.parse(document.getElementById("history-chart-json").textContent);
+      }} catch (error) {{ historyChartFailed(); return; }}
+      var root = document.querySelector(".rank-history");
+      var press;
+      chart.addEventListener("pointerdown", function(event) {{
+        if (event.button !== 0) return;
+        press = {{ x: event.clientX, y: event.clientY, id: event.pointerId }};
+      }}, true);
+      window.addEventListener("pointercancel", function() {{ press = null; }}, true);
+      window.addEventListener("pointerup", function(event) {{
+        var start = press;
+        press = null;
+        if (!start || start.id !== event.pointerId || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 10 || !chart.dataset.rendered) return;
+        var rect = chart.getBoundingClientRect();
+        var axes = chart._fullLayout;
+        var nearest;
+        var distance = 24;
+        chart.data.forEach(function(trace) {{
+          if (trace.visible === false || trace.visible === "legendonly") return;
+          trace.x.forEach(function(gw, index) {{
+            var x = rect.left + axes.xaxis._offset + axes.xaxis.d2p(gw);
+            var y = rect.top + axes.yaxis._offset + axes.yaxis.d2p(trace.y[index]);
+            var delta = Math.hypot(event.clientX - x, event.clientY - y);
+            if (delta < distance) {{ distance = delta; nearest = gw; }}
+          }});
+        }});
+        if (nearest !== undefined) selectHistoryRound(nearest);
+      }}, true);
+      document.querySelectorAll("[data-chart-trace]").forEach(function(input) {{
+        input.addEventListener("change", function() {{
+          var index = Number(input.dataset.chartTrace);
+          var manager = historyFigure.data[index].meta.manager;
+          document.querySelector('.chart-selected-ranks [data-chart-manager="' + manager + '"]').hidden = !input.checked;
+          document.getElementById("chart-status").textContent = document.querySelector("[data-chart-trace]:checked") ? "" : "No managers selected.";
+          Promise.resolve().then(function() {{ return Plotly.restyle(chart, {{ visible: input.checked }}, [index]); }}).catch(historyChartFailed);
+        }});
+      }});
+      document.querySelector(".chart-retry").addEventListener("click", renderHistoryChart);
+      document.querySelector(".chart-frame").hidden = false;
+      document.getElementById("chart-status").textContent = "Rank chart pending.";
+      if ("ResizeObserver" in window) new ResizeObserver(tuneHistoryChart).observe(document.querySelector(".chart-frame"));
 
       if ("IntersectionObserver" in window) {{
         var observer = new IntersectionObserver(function(entries) {{
@@ -2130,7 +2351,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           }});
         }}, {{ rootMargin: "320px 0px" }});
 
-        observer.observe(chart);
+        observer.observe(root);
         return;
       }}
 
@@ -2270,6 +2491,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     window.addEventListener("load", initHistoryChart);
     initHistoryDialog();
     window.addEventListener("resize", tuneHistoryChart);
+    window.addEventListener("orientationchange", tuneHistoryChart);
   </script>
 </body>
 </html>"""
