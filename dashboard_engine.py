@@ -456,51 +456,45 @@ def build_summary_html(standings, gw, gw_average):
 
     leader = standings[0]
     second = standings[1] if len(standings) > 1 else standings[0]
-    best_gw = max(standings, key=lambda s: s["gw"])
+    best_points = max(s["gw"] for s in standings)
+    best_managers = [s["manager"] for s in standings if s["gw"] == best_points]
+    best_names = ", ".join(escape(name) for name in best_managers)
     leader_gap = max(leader["total"] - second["total"], 0)
     active_chips = [s for s in standings if s["chip"] != "None"]
     chip_items = "".join(
-        f'<span class="chip-desk-pill">{escape(s["manager"])}: {escape(s["chip"])}</span>'
+        f'<li data-manager="{escape(s["manager"].lower(), quote=True)}">'
+        f'<span class="chip-manager">{escape(s["manager"])}</span>'
+        f'<span class="chip-name">{escape(s["chip"])}</span></li>'
         for s in active_chips
-    ) or '<span class="chip-desk-pill muted">No active chips</span>'
+    )
+    chip_html = (
+        f'<ul class="context-chips">{chip_items}</ul>'
+        if chip_items else '<p class="context-empty">No active chips</p>'
+    )
+    average_label = f"{format_number(gw_average)} pts" if gw_average is not None else "Unavailable"
+    average_value = str(gw_average) if gw_average is not None else ""
+    best_label = "Best GW" if len(best_managers) == 1 else "Best GW · tied"
 
     return f"""
-  <section class="summary-grid" aria-label="Executive summary">
-    <article class="metric-card gw-card">
-      <span class="metric-label">Live Race</span>
-      <strong>GW{gw}</strong>
-      <small>Season {ACTIVE_SEASON}</small>
-    </article>
-
-    <article class="metric-card accent-gold">
-      <span class="metric-label">Leader</span>
-      <strong>{leader['emoji']} {escape(leader['team'])}</strong>
-      <small>{escape(leader['manager'])} • {format_number(leader['total'])} pts</small>
-    </article>
-
-    <article class="metric-card">
-      <span class="metric-label">Race Gap</span>
-      <strong>{leader_gap} pts</strong>
-      <small>1st to 2nd</small>
-    </article>
-
-    <article class="metric-card accent-cyan">
-      <span class="metric-label">Best GW</span>
-      <strong>{best_gw['gw']} pts</strong>
-      <small>{escape(best_gw['manager'])} this week</small>
-    </article>
-
-    <article class="metric-card">
-      <span class="metric-label">GW Average</span>
-      <strong>{gw_average} pts</strong>
-      <small>FPL benchmark</small>
-    </article>
-
-    <article class="metric-card wide">
-      <span class="metric-label">Chip Desk</span>
-      <div class="chip-desk-list">{chip_items}</div>
-      <small>Current gameweek activity</small>
-    </article>
+  <section class="gw-context" aria-label="Gameweek {gw} context">
+    <dl class="context-facts">
+      <div class="context-fact" data-context="gap">
+        <dt>Lead gap</dt>
+        <dd><strong>{format_number(leader_gap)} pts</strong><small>1st to 2nd</small></dd>
+      </div>
+      <div class="context-fact" data-context="best">
+        <dt>{best_label}</dt>
+        <dd><strong>{format_number(best_points)} pts</strong><small>{best_names}</small></dd>
+      </div>
+      <div class="context-fact" data-context="average" data-value="{escape(average_value, quote=True)}">
+        <dt>GW average</dt>
+        <dd><strong>{average_label}</strong><small>FPL benchmark</small></dd>
+      </div>
+    </dl>
+    <div class="context-chip-activity">
+      <h3>Chip activity</h3>
+      {chip_html}
+    </div>
   </section>
 """
 
@@ -852,7 +846,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .section-panel,
-    .metric-card,
     .card {{
       border: 1px solid var(--line);
       background: var(--panel);
@@ -1115,84 +1108,85 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       line-height: 1.45;
     }}
 
-    .summary-grid {{
-      position: relative;
-      z-index: 1;
+    .gw-context {{
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin: 18px 0 26px;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: var(--space-5);
+      padding-bottom: var(--space-5);
+      border-bottom: 1px solid var(--line);
     }}
 
-    .metric-card {{
-      border-radius: 8px;
-      padding: 18px;
-      min-height: 128px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+    .context-facts {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-4);
     }}
 
-    .metric-card.wide {{
-      grid-column: span 2;
+    .context-fact dt,
+    .context-chip-activity h3 {{
+      color: var(--muted);
+      font-size: var(--text-xs);
+      font-weight: 500;
     }}
 
-    .gw-card strong {{
-      font-family: var(--font-body);
-      color: var(--gold);
-      font-size: 2rem;
-    }}
-
-    .metric-card strong {{
+    .context-fact strong {{
       display: block;
-      margin: 12px 0 6px;
-      font-size: var(--text-metric);
-      line-height: 1.15;
+      margin-top: var(--space-1);
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.3;
     }}
 
-    .metric-card small,
+    .context-fact small {{
+      display: block;
+      margin-top: var(--space-1);
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }}
+
     .card small {{
       color: var(--muted);
     }}
 
-    .chip-desk-list {{
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0 10px;
+    .context-chips {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+      list-style: none;
     }}
 
-    .chip-desk-pill {{
-      display: inline-flex;
-      align-items: center;
-      min-height: 32px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(77,225,255,0.10);
-      color: var(--text);
-      border: 1px solid rgba(77,225,255,0.24);
-      font-size: 0.86rem;
-      font-weight: 800;
-      white-space: nowrap;
+    .context-chips li {{
+      padding-left: var(--space-2);
+      border-left: 2px solid var(--manager-color, var(--muted));
     }}
 
-    .chip-desk-pill.muted {{
+    .chip-manager,
+    .chip-name {{
+      display: block;
+      font-size: var(--text-xs);
+    }}
+
+    .chip-manager {{
+      font-weight: 700;
+    }}
+
+    .chip-name {{
+      margin-top: var(--space-1);
       color: var(--muted);
-      border-color: rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
     }}
 
-    .accent-gold {{
-      border-color: rgba(245,200,76,0.42);
+    .context-empty {{
+      margin-top: var(--space-2);
+      color: var(--muted);
+      font-size: var(--text-sm);
     }}
 
-    .accent-cyan {{
-      border-color: rgba(77,225,255,0.42);
-    }}
-
-    .previous-champion-card {{
-      border-color: rgba(245,200,76,0.30);
-      background: linear-gradient(145deg, rgba(35,28,15,0.78), rgba(10,14,25,0.94));
+    .gw-context dt,
+    .gw-context dd,
+    .gw-context li {{
+      min-width: 0;
+      overflow-wrap: anywhere;
     }}
 
     .section-panel {{
@@ -1335,7 +1329,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       overflow-wrap: anywhere;
     }}
 
-    .race-context .metric-card strong,
     .transfers-section .card h2 {{
       overflow-wrap: anywhere;
     }}
@@ -1393,6 +1386,34 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     @media (max-width: 900px) {{
+      .gw-context {{
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-4);
+      }}
+
+      .context-facts {{
+        gap: var(--space-2);
+      }}
+
+      .context-chips {{
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-2);
+      }}
+
+      .context-chips li {{
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        gap: var(--space-2);
+      }}
+
+      .chip-name {{
+        margin-top: 0;
+      }}
+
+      .context-fact[data-value=""] strong {{
+        font-size: var(--text-sm);
+      }}
+
       .standings-heading {{
         display: block;
       }}
@@ -1775,14 +1796,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         font-size: 0.76rem;
       }}
 
-      .summary-grid,
       .insight-grid,
       .container {{
         grid-template-columns: 1fr;
-      }}
-
-      .metric-card.wide {{
-        grid-column: auto;
       }}
 
       .section-heading {{
@@ -1799,7 +1815,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         font-size: 0.86rem;
       }}
 
-      .metric-card:hover,
       .insight-item:hover,
       .card:hover {{
         transform: none;
