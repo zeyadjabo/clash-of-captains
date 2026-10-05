@@ -1214,11 +1214,133 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .league-table {{
-      overflow-x: auto;
+      overflow: visible;
       padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      margin: var(--space-5) 0;
     }}
 
-    .standings-mobile-list {{
+    .standings-heading {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-4);
+      margin-bottom: var(--space-4);
+    }}
+
+    .standings-heading p {{
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }}
+
+    .standings-table {{
+      table-layout: fixed;
+      min-width: 0;
+    }}
+
+    .standings-table th,
+    .standings-table td {{
+      padding: var(--space-3) var(--space-2);
+      color: var(--text);
+      background: transparent;
+      font-size: var(--text-sm);
+      vertical-align: middle;
+    }}
+
+    .standings-table thead th {{
+      color: var(--muted);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      border-bottom: 1px solid var(--line);
+      text-transform: none;
+    }}
+
+    .standings-table thead th:nth-child(1) {{ width: 56px; }}
+    .standings-table thead th:nth-child(3) {{ width: 100px; }}
+    .standings-table thead th:nth-child(4) {{ width: 72px; }}
+    .standings-table thead th:nth-child(5) {{ width: 84px; }}
+    .standings-table thead th:nth-child(6) {{ width: 130px; }}
+    .standings-table thead th:nth-child(7) {{ width: 156px; }}
+
+    .standings-table tbody tr {{
+      border-bottom: 1px solid var(--line);
+    }}
+
+    .standings-table tbody tr:hover td,
+    .standings-table tbody tr:hover th {{
+      background: transparent;
+    }}
+
+    .standing-team {{
+      display: block;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      text-transform: none;
+    }}
+
+    .standing-manager {{
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: var(--text-xs);
+      font-weight: 400;
+      text-transform: none;
+    }}
+
+    .score-track {{
+      position: relative;
+      display: block;
+      height: 4px;
+      margin-top: var(--space-2);
+      background: var(--panel-strong);
+    }}
+
+    .score-track > span {{
+      position: absolute;
+      left: var(--score-left);
+      width: var(--score-width);
+      height: 100%;
+      background: var(--manager-color, var(--muted));
+    }}
+
+    .score-track::after {{
+      content: '';
+      position: absolute;
+      left: var(--score-zero);
+      top: -2px;
+      width: 1px;
+      height: 8px;
+      background: var(--muted);
+    }}
+
+    .standings-table .standing-total strong {{
+      font-size: var(--text-metric);
+      font-weight: 800;
+    }}
+
+    .standings-table .rank-badge {{
+      min-width: 32px;
+      height: 32px;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: var(--text-body);
+    }}
+
+    .standing-chip {{
+      overflow-wrap: anywhere;
+    }}
+
+    .race-context .metric-card strong,
+    .transfers-section .card h2 {{
+      overflow-wrap: anywhere;
+    }}
+
+    .mobile-stat-label {{
       display: none;
     }}
 
@@ -1250,20 +1372,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-align: right;
     }}
 
-    tr.yours td {{
-      background: rgba(245,200,76,0.07);
-    }}
-
     tbody tr {{
       transition: background 160ms ease;
     }}
 
     tbody tr:hover td {{
       background: rgba(255,255,255,0.055);
-    }}
-
-    tbody tr.yours:hover td {{
-      background: rgba(245,200,76,0.11);
     }}
 
     .rank-badge {{
@@ -1276,6 +1390,84 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       background: rgba(245,200,76,0.14);
       color: var(--gold);
       font-weight: 800;
+    }}
+
+    @media (max-width: 900px) {{
+      .standings-heading {{
+        display: block;
+      }}
+
+      .standings-heading p {{
+        margin-top: var(--space-1);
+      }}
+
+      .standings-table,
+      .standings-table tbody {{
+        display: block;
+      }}
+
+      .standings-table thead {{
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }}
+
+      .standings-table tbody tr {{
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr) 84px;
+        column-gap: var(--space-2);
+        row-gap: var(--space-2);
+        padding: var(--space-3) 0;
+      }}
+
+      .standings-table th,
+      .standings-table td {{
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        font-size: var(--text-sm);
+      }}
+
+      .standing-position {{ grid-column: 1; grid-row: 1; }}
+      .standing-identity {{ grid-column: 2; grid-row: 1; }}
+      .standing-total {{ grid-column: 3; grid-row: 1; }}
+      .standing-gw {{ grid-column: 2; grid-row: 2; }}
+      .standing-gap {{ grid-column: 3; grid-row: 2; }}
+      .standing-rank {{ grid-column: 2 / 4; grid-row: 3; }}
+      .standing-chip {{ grid-column: 2 / 4; grid-row: 4; }}
+
+      .standings-table .standing-gw,
+      .standings-table .standing-rank,
+      .standings-table .standing-chip {{
+        text-align: left;
+      }}
+
+      .standings-table .standing-rank,
+      .standings-table .standing-chip {{
+        font-size: var(--text-xs);
+        color: var(--muted);
+      }}
+
+      .mobile-stat-label {{
+        display: inline;
+        margin-right: var(--space-1);
+        color: var(--muted);
+        font-size: var(--text-xs);
+        font-weight: 400;
+      }}
+
+      .standing-total .mobile-stat-label {{
+        display: block;
+        margin: 0;
+      }}
+
+      .standings-table .standing-total strong {{
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }}
     }}
 
     .chip {{
@@ -1589,88 +1781,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         grid-template-columns: 1fr;
       }}
 
-      .league-table {{
-        overflow-x: visible;
-      }}
-
-      .league-table table {{
-        display: none;
-      }}
-
-      .standings-mobile-list {{
-        display: grid;
-        gap: 12px;
-      }}
-
-      .standing-mobile-card {{
-        display: grid;
-        gap: 14px;
-        padding: 14px;
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 8px;
-        background: rgba(255,255,255,0.045);
-      }}
-
-      .standing-mobile-card.yours {{
-        border-color: rgba(245,200,76,0.44);
-        background: rgba(245,200,76,0.075);
-      }}
-
-      .standing-mobile-head {{
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: 10px;
-        align-items: center;
-      }}
-
-      .standing-mobile-team {{
-        min-width: 0;
-      }}
-
-      .standing-mobile-team strong {{
-        display: block;
-        color: var(--text);
-        font-size: 0.98rem;
-        line-height: 1.2;
-      }}
-
-      .standing-mobile-team small {{
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 0.78rem;
-      }}
-
-      .standing-mobile-stats {{
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }}
-
-      .standing-mobile-stat {{
-        min-height: 62px;
-        padding: 10px;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 8px;
-        background: rgba(0,0,0,0.18);
-      }}
-
-      .standing-mobile-stat span {{
-        display: block;
-        color: var(--cyan);
-        font-size: 0.64rem;
-        font-weight: 800;
-        letter-spacing: 0;
-        text-transform: uppercase;
-      }}
-
-      .standing-mobile-stat strong {{
-        display: block;
-        margin-top: 6px;
-        color: var(--text);
-        font-size: 0.96rem;
-      }}
-
       .metric-card.wide {{
         grid-column: auto;
       }}
@@ -1721,31 +1831,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </nav>
     </header>
 
-    {summary_html}
-
-    <section class="section-panel league-table">
-      <div class="section-heading">
-        <h2>Current standings</h2>
+    <section class="section-panel league-table" aria-labelledby="standings-heading">
+      <div class="section-heading standings-heading">
+        <h2 id="standings-heading">Current standings</h2>
+        <p id="score-scale">{score_scale}</p>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Pos</th>
-            <th>Team</th>
-            <th>Manager</th>
-            <th class="num">Total</th>
-            <th class="num">GW</th>
-            <th class="num">Gap</th>
-            <th class="num">Live Rank</th>
-            <th>Chip</th>
+      <table class="standings-table" role="table" aria-labelledby="standings-heading" aria-describedby="score-scale">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Pos</th>
+            <th role="columnheader" scope="col">Team / Manager</th>
+            <th role="columnheader" scope="col" class="num">Total</th>
+            <th role="columnheader" scope="col" class="num">GW</th>
+            <th role="columnheader" scope="col" class="num">Gap</th>
+            <th role="columnheader" scope="col" class="num">Overall rank</th>
+            <th role="columnheader" scope="col">Chip</th>
           </tr>
         </thead>
-        <tbody>{standings_html}</tbody>
+        <tbody role="rowgroup">{standings_html}</tbody>
       </table>
-      <div class="standings-mobile-list">
-        {standings_mobile_html}
-      </div>
     </section>
+
+    <div class="race-context">{summary_html}</div>
 
     <section class="section-panel history-chart-box">
       <div class="section-heading">
@@ -1906,6 +2013,41 @@ CARD_TEMPLATE = """
 
 
 # ====================== HTML GENERATION ======================
+def build_standings_html(standings):
+    totals = [s["total"] for s in standings]
+    scale_min = min([0, *totals])
+    scale_max = max([0, *totals])
+    extent = scale_max - scale_min
+    zero = -scale_min / extent * 100 if extent else 0
+    leader_total = standings[0]["total"] if standings else 0
+    rows = []
+
+    for local_rank, s in enumerate(standings, 1):
+        gap = leader_total - s["total"]
+        gap_label = "Leader" if gap == 0 else f"-{gap}"
+        key = s["manager"].lower()
+        endpoint = (s["total"] - scale_min) / extent * 100 if extent else 0
+        bar_left = min(zero, endpoint)
+        bar_width = abs(endpoint - zero)
+        chip_label = "No chip" if s["chip"] == "None" else s["chip"]
+        rows.append(f"""
+        <tr role="row" data-manager="{escape(key, quote=True)}">
+          <td role="cell" class="standing-position" data-field="position"><span class="rank-badge">#{local_rank}</span></td>
+          <th role="rowheader" scope="row" class="standing-identity" data-field="identity">
+            <span class="standing-team">{escape(s['emoji'])} {escape(s['team'])}</span>
+            <span class="standing-manager">{escape(s['manager'])}</span>
+            <span class="score-track" aria-hidden="true" style="--score-zero:{zero:.4f}%;--score-left:{bar_left:.4f}%;--score-width:{bar_width:.4f}%"><span></span></span>
+          </th>
+          <td role="cell" class="standing-total num" data-field="total"><span class="mobile-stat-label">Total</span><strong>{format_number(s['total'])}</strong></td>
+          <td role="cell" class="standing-gw num" data-field="gw"><span class="mobile-stat-label">GW</span><strong>{s['gw']}</strong></td>
+          <td role="cell" class="standing-gap num" data-field="gap"><span class="mobile-stat-label">Gap</span><span>{gap_label}</span></td>
+          <td role="cell" class="standing-rank num" data-field="rank"><span class="mobile-stat-label">Overall rank</span><span>{format_rank(s['rank'])}</span></td>
+          <td role="cell" class="standing-chip" data-field="chip"><span class="mobile-stat-label">Chip</span><span>{escape(chip_label)}</span></td>
+        </tr>""")
+
+    return "".join(rows), f"Points scale: {format_number(scale_min)}–{format_number(scale_max)}"
+
+
 def generate_html(gw, gw_average, players, managers, history_chart_html):
     cards = []
     standings = []
@@ -1983,58 +2125,7 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
 
     standings.sort(key=lambda x: int(x.get("league_rank") or 999999))
 
-    standings_html = ""
-    standings_mobile_html = ""
-    leader_total = standings[0]["total"] if standings else 0
-
-    for index, s in enumerate(standings, 1):
-        row_class = ' class="yours"' if s["yours"] else ""
-        gap = leader_total - s["total"]
-        gap_label = "Leader" if gap == 0 else f"-{gap}"
-        chip_class = "chip none" if s["chip"] == "None" else "chip"
-        local_rank = index
-
-        standings_html += f"""
-        <tr{row_class}>
-          <td><span class="rank-badge">#{local_rank}</span></td>
-          <td>{s['emoji']} {escape(s['team'])}</td>
-          <td>{escape(s['manager'])}</td>
-          <td class="num"><strong>{format_number(s['total'])}</strong></td>
-          <td class="num">{s['gw']}</td>
-          <td class="num">{gap_label}</td>
-          <td class="num">{format_rank(s['rank'])}</td>
-          <td><span class="{chip_class}">{s['chip']}</span></td>
-        </tr>"""
-
-        standings_mobile_html += f"""
-        <article class="standing-mobile-card{' yours' if s['yours'] else ''}">
-          <div class="standing-mobile-head">
-            <span class="rank-badge">#{local_rank}</span>
-            <div class="standing-mobile-team">
-              <strong>{s['emoji']} {escape(s['team'])}</strong>
-              <small>{escape(s['manager'])}</small>
-            </div>
-          </div>
-          <div class="standing-mobile-stats">
-            <div class="standing-mobile-stat">
-              <span>Total</span>
-              <strong>{format_number(s['total'])}</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>GW</span>
-              <strong>{s['gw']}</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Gap</span>
-              <strong>{gap_label}</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Live Rank</span>
-              <strong>{format_rank(s['rank'])}</strong>
-            </div>
-          </div>
-          <span class="{chip_class}">{s['chip']}</span>
-        </article>"""
+    standings_html, score_scale = build_standings_html(standings)
 
     summary_html = build_summary_html(standings, gw, gw_average)
     trophy_html = build_trophy_cabinet_html().strip()
@@ -2050,7 +2141,7 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
         summary_html=summary_html,
         cards="\n".join(cards),
         standings_html=standings_html,
-        standings_mobile_html=standings_mobile_html,
+        score_scale=score_scale,
         history_chart_html=history_chart_html
     )
 

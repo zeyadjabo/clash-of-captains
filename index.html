@@ -484,11 +484,133 @@
     }
 
     .league-table {
-      overflow-x: auto;
+      overflow: visible;
       padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      margin: var(--space-5) 0;
     }
 
-    .standings-mobile-list {
+    .standings-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .standings-heading p {
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }
+
+    .standings-table {
+      table-layout: fixed;
+      min-width: 0;
+    }
+
+    .standings-table th,
+    .standings-table td {
+      padding: var(--space-3) var(--space-2);
+      color: var(--text);
+      background: transparent;
+      font-size: var(--text-sm);
+      vertical-align: middle;
+    }
+
+    .standings-table thead th {
+      color: var(--muted);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      border-bottom: 1px solid var(--line);
+      text-transform: none;
+    }
+
+    .standings-table thead th:nth-child(1) { width: 56px; }
+    .standings-table thead th:nth-child(3) { width: 100px; }
+    .standings-table thead th:nth-child(4) { width: 72px; }
+    .standings-table thead th:nth-child(5) { width: 84px; }
+    .standings-table thead th:nth-child(6) { width: 130px; }
+    .standings-table thead th:nth-child(7) { width: 156px; }
+
+    .standings-table tbody tr {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .standings-table tbody tr:hover td,
+    .standings-table tbody tr:hover th {
+      background: transparent;
+    }
+
+    .standing-team {
+      display: block;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      text-transform: none;
+    }
+
+    .standing-manager {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: var(--text-xs);
+      font-weight: 400;
+      text-transform: none;
+    }
+
+    .score-track {
+      position: relative;
+      display: block;
+      height: 4px;
+      margin-top: var(--space-2);
+      background: var(--panel-strong);
+    }
+
+    .score-track > span {
+      position: absolute;
+      left: var(--score-left);
+      width: var(--score-width);
+      height: 100%;
+      background: var(--manager-color, var(--muted));
+    }
+
+    .score-track::after {
+      content: '';
+      position: absolute;
+      left: var(--score-zero);
+      top: -2px;
+      width: 1px;
+      height: 8px;
+      background: var(--muted);
+    }
+
+    .standings-table .standing-total strong {
+      font-size: var(--text-metric);
+      font-weight: 800;
+    }
+
+    .standings-table .rank-badge {
+      min-width: 32px;
+      height: 32px;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: var(--text-body);
+    }
+
+    .standing-chip {
+      overflow-wrap: anywhere;
+    }
+
+    .race-context .metric-card strong,
+    .transfers-section .card h2 {
+      overflow-wrap: anywhere;
+    }
+
+    .mobile-stat-label {
       display: none;
     }
 
@@ -520,20 +642,12 @@
       text-align: right;
     }
 
-    tr.yours td {
-      background: rgba(245,200,76,0.07);
-    }
-
     tbody tr {
       transition: background 160ms ease;
     }
 
     tbody tr:hover td {
       background: rgba(255,255,255,0.055);
-    }
-
-    tbody tr.yours:hover td {
-      background: rgba(245,200,76,0.11);
     }
 
     .rank-badge {
@@ -546,6 +660,84 @@
       background: rgba(245,200,76,0.14);
       color: var(--gold);
       font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .standings-heading {
+        display: block;
+      }
+
+      .standings-heading p {
+        margin-top: var(--space-1);
+      }
+
+      .standings-table,
+      .standings-table tbody {
+        display: block;
+      }
+
+      .standings-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+
+      .standings-table tbody tr {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr) 84px;
+        column-gap: var(--space-2);
+        row-gap: var(--space-2);
+        padding: var(--space-3) 0;
+      }
+
+      .standings-table th,
+      .standings-table td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        font-size: var(--text-sm);
+      }
+
+      .standing-position { grid-column: 1; grid-row: 1; }
+      .standing-identity { grid-column: 2; grid-row: 1; }
+      .standing-total { grid-column: 3; grid-row: 1; }
+      .standing-gw { grid-column: 2; grid-row: 2; }
+      .standing-gap { grid-column: 3; grid-row: 2; }
+      .standing-rank { grid-column: 2 / 4; grid-row: 3; }
+      .standing-chip { grid-column: 2 / 4; grid-row: 4; }
+
+      .standings-table .standing-gw,
+      .standings-table .standing-rank,
+      .standings-table .standing-chip {
+        text-align: left;
+      }
+
+      .standings-table .standing-rank,
+      .standings-table .standing-chip {
+        font-size: var(--text-xs);
+        color: var(--muted);
+      }
+
+      .mobile-stat-label {
+        display: inline;
+        margin-right: var(--space-1);
+        color: var(--muted);
+        font-size: var(--text-xs);
+        font-weight: 400;
+      }
+
+      .standing-total .mobile-stat-label {
+        display: block;
+        margin: 0;
+      }
+
+      .standings-table .standing-total strong {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
     }
 
     .chip {
@@ -859,88 +1051,6 @@
         grid-template-columns: 1fr;
       }
 
-      .league-table {
-        overflow-x: visible;
-      }
-
-      .league-table table {
-        display: none;
-      }
-
-      .standings-mobile-list {
-        display: grid;
-        gap: 12px;
-      }
-
-      .standing-mobile-card {
-        display: grid;
-        gap: 14px;
-        padding: 14px;
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 8px;
-        background: rgba(255,255,255,0.045);
-      }
-
-      .standing-mobile-card.yours {
-        border-color: rgba(245,200,76,0.44);
-        background: rgba(245,200,76,0.075);
-      }
-
-      .standing-mobile-head {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: 10px;
-        align-items: center;
-      }
-
-      .standing-mobile-team {
-        min-width: 0;
-      }
-
-      .standing-mobile-team strong {
-        display: block;
-        color: var(--text);
-        font-size: 0.98rem;
-        line-height: 1.2;
-      }
-
-      .standing-mobile-team small {
-        display: block;
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 0.78rem;
-      }
-
-      .standing-mobile-stats {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .standing-mobile-stat {
-        min-height: 62px;
-        padding: 10px;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 8px;
-        background: rgba(0,0,0,0.18);
-      }
-
-      .standing-mobile-stat span {
-        display: block;
-        color: var(--cyan);
-        font-size: 0.64rem;
-        font-weight: 800;
-        letter-spacing: 0;
-        text-transform: uppercase;
-      }
-
-      .standing-mobile-stat strong {
-        display: block;
-        margin-top: 6px;
-        color: var(--text);
-        font-size: 0.96rem;
-      }
-
       .metric-card.wide {
         grid-column: auto;
       }
@@ -1036,7 +1146,67 @@
       </nav>
     </header>
 
-    
+    <section class="section-panel league-table" aria-labelledby="standings-heading">
+      <div class="section-heading standings-heading">
+        <h2 id="standings-heading">Current standings</h2>
+        <p id="score-scale">Points scale: 0–389</p>
+      </div>
+      <table class="standings-table" role="table" aria-labelledby="standings-heading" aria-describedby="score-scale">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Pos</th>
+            <th role="columnheader" scope="col">Team / Manager</th>
+            <th role="columnheader" scope="col" class="num">Total</th>
+            <th role="columnheader" scope="col" class="num">GW</th>
+            <th role="columnheader" scope="col" class="num">Gap</th>
+            <th role="columnheader" scope="col" class="num">Overall rank</th>
+            <th role="columnheader" scope="col">Chip</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+        <tr role="row" data-manager="sam">
+          <td role="cell" class="standing-position" data-field="position"><span class="rank-badge">#1</span></td>
+          <th role="rowheader" scope="row" class="standing-identity" data-field="identity">
+            <span class="standing-team">🇪🇬 Spreadsheet FC</span>
+            <span class="standing-manager">Sam</span>
+            <span class="score-track" aria-hidden="true" style="--score-zero:0.0000%;--score-left:0.0000%;--score-width:100.0000%"><span></span></span>
+          </th>
+          <td role="cell" class="standing-total num" data-field="total"><span class="mobile-stat-label">Total</span><strong>389</strong></td>
+          <td role="cell" class="standing-gw num" data-field="gw"><span class="mobile-stat-label">GW</span><strong>53</strong></td>
+          <td role="cell" class="standing-gap num" data-field="gap"><span class="mobile-stat-label">Gap</span><span>Leader</span></td>
+          <td role="cell" class="standing-rank num" data-field="rank"><span class="mobile-stat-label">Overall rank</span><span>#30,146</span></td>
+          <td role="cell" class="standing-chip" data-field="chip"><span class="mobile-stat-label">Chip</span><span>No chip</span></td>
+        </tr>
+        <tr role="row" data-manager="joey">
+          <td role="cell" class="standing-position" data-field="position"><span class="rank-badge">#2</span></td>
+          <th role="rowheader" scope="row" class="standing-identity" data-field="identity">
+            <span class="standing-team">💩 Ugarte to Be Kidding</span>
+            <span class="standing-manager">Joey</span>
+            <span class="score-track" aria-hidden="true" style="--score-zero:0.0000%;--score-left:0.0000%;--score-width:89.2031%"><span></span></span>
+          </th>
+          <td role="cell" class="standing-total num" data-field="total"><span class="mobile-stat-label">Total</span><strong>347</strong></td>
+          <td role="cell" class="standing-gw num" data-field="gw"><span class="mobile-stat-label">GW</span><strong>52</strong></td>
+          <td role="cell" class="standing-gap num" data-field="gap"><span class="mobile-stat-label">Gap</span><span>-42</span></td>
+          <td role="cell" class="standing-rank num" data-field="rank"><span class="mobile-stat-label">Overall rank</span><span>#866,562</span></td>
+          <td role="cell" class="standing-chip" data-field="chip"><span class="mobile-stat-label">Chip</span><span>No chip</span></td>
+        </tr>
+        <tr role="row" data-manager="zee">
+          <td role="cell" class="standing-position" data-field="position"><span class="rank-badge">#3</span></td>
+          <th role="rowheader" scope="row" class="standing-identity" data-field="identity">
+            <span class="standing-team">🤖 Cunha Matata</span>
+            <span class="standing-manager">Zee</span>
+            <span class="score-track" aria-hidden="true" style="--score-zero:0.0000%;--score-left:0.0000%;--score-width:78.6632%"><span></span></span>
+          </th>
+          <td role="cell" class="standing-total num" data-field="total"><span class="mobile-stat-label">Total</span><strong>306</strong></td>
+          <td role="cell" class="standing-gw num" data-field="gw"><span class="mobile-stat-label">GW</span><strong>45</strong></td>
+          <td role="cell" class="standing-gap num" data-field="gap"><span class="mobile-stat-label">Gap</span><span>-83</span></td>
+          <td role="cell" class="standing-rank num" data-field="rank"><span class="mobile-stat-label">Overall rank</span><span>#3,900,773</span></td>
+          <td role="cell" class="standing-chip" data-field="chip"><span class="mobile-stat-label">Chip</span><span>No chip</span></td>
+        </tr></tbody>
+      </table>
+    </section>
+
+    <div class="race-context">
   <section class="summary-grid" aria-label="Executive summary">
     <article class="metric-card gw-card">
       <span class="metric-label">Live Race</span>
@@ -1074,145 +1244,7 @@
       <small>Current gameweek activity</small>
     </article>
   </section>
-
-
-    <section class="section-panel league-table">
-      <div class="section-heading">
-        <h2>Current standings</h2>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Pos</th>
-            <th>Team</th>
-            <th>Manager</th>
-            <th class="num">Total</th>
-            <th class="num">GW</th>
-            <th class="num">Gap</th>
-            <th class="num">Live Rank</th>
-            <th>Chip</th>
-          </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td><span class="rank-badge">#1</span></td>
-          <td>🇪🇬 Spreadsheet FC</td>
-          <td>Sam</td>
-          <td class="num"><strong>389</strong></td>
-          <td class="num">53</td>
-          <td class="num">Leader</td>
-          <td class="num">#30,146</td>
-          <td><span class="chip none">None</span></td>
-        </tr>
-        <tr>
-          <td><span class="rank-badge">#2</span></td>
-          <td>💩 Ugarte to Be Kidding</td>
-          <td>Joey</td>
-          <td class="num"><strong>347</strong></td>
-          <td class="num">52</td>
-          <td class="num">-42</td>
-          <td class="num">#866,562</td>
-          <td><span class="chip none">None</span></td>
-        </tr>
-        <tr class="yours">
-          <td><span class="rank-badge">#3</span></td>
-          <td>🤖 Cunha Matata</td>
-          <td>Zee</td>
-          <td class="num"><strong>306</strong></td>
-          <td class="num">45</td>
-          <td class="num">-83</td>
-          <td class="num">#3,900,773</td>
-          <td><span class="chip none">None</span></td>
-        </tr></tbody>
-      </table>
-      <div class="standings-mobile-list">
-        
-        <article class="standing-mobile-card">
-          <div class="standing-mobile-head">
-            <span class="rank-badge">#1</span>
-            <div class="standing-mobile-team">
-              <strong>🇪🇬 Spreadsheet FC</strong>
-              <small>Sam</small>
-            </div>
-          </div>
-          <div class="standing-mobile-stats">
-            <div class="standing-mobile-stat">
-              <span>Total</span>
-              <strong>389</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>GW</span>
-              <strong>53</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Gap</span>
-              <strong>Leader</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Live Rank</span>
-              <strong>#30,146</strong>
-            </div>
-          </div>
-          <span class="chip none">None</span>
-        </article>
-        <article class="standing-mobile-card">
-          <div class="standing-mobile-head">
-            <span class="rank-badge">#2</span>
-            <div class="standing-mobile-team">
-              <strong>💩 Ugarte to Be Kidding</strong>
-              <small>Joey</small>
-            </div>
-          </div>
-          <div class="standing-mobile-stats">
-            <div class="standing-mobile-stat">
-              <span>Total</span>
-              <strong>347</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>GW</span>
-              <strong>52</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Gap</span>
-              <strong>-42</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Live Rank</span>
-              <strong>#866,562</strong>
-            </div>
-          </div>
-          <span class="chip none">None</span>
-        </article>
-        <article class="standing-mobile-card yours">
-          <div class="standing-mobile-head">
-            <span class="rank-badge">#3</span>
-            <div class="standing-mobile-team">
-              <strong>🤖 Cunha Matata</strong>
-              <small>Zee</small>
-            </div>
-          </div>
-          <div class="standing-mobile-stats">
-            <div class="standing-mobile-stat">
-              <span>Total</span>
-              <strong>306</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>GW</span>
-              <strong>45</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Gap</span>
-              <strong>-83</strong>
-            </div>
-            <div class="standing-mobile-stat">
-              <span>Live Rank</span>
-              <strong>#3,900,773</strong>
-            </div>
-          </div>
-          <span class="chip none">None</span>
-        </article>
-      </div>
-    </section>
+</div>
 
     <section class="section-panel history-chart-box">
       <div class="section-heading">
