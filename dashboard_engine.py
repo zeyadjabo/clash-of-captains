@@ -694,21 +694,43 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <title>Clash of Captains - FPL Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap"></noscript>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
 
   <style>
     :root {{
-      --bg: #070910;
-      --panel: rgba(15, 20, 34, 0.84);
-      --panel-strong: rgba(21, 28, 46, 0.94);
+      color-scheme: dark;
+      --bg: #101214;
+      --panel: #191c20;
+      --panel-strong: #23272c;
       --line: rgba(255, 255, 255, 0.12);
-      --gold: #f5c84c;
-      --cyan: #4de1ff;
-      --rose: #ff4f7b;
-      --green: #62e29a;
-      --text: #f5f7fb;
-      --muted: #aeb8c9;
+      --gold: #ecc65b;
+      --cyan: #65d5e9;
+      --rose: #f18a9f;
+      --green: #82d4a5;
+      --text: #f1f4f5;
+      --muted: #bac2c8;
+      --manager-zee: #65d5e9;
+      --manager-sam: #f29d8b;
+      --manager-joey: #92d9b1;
+      --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-body: 1rem;
+      --text-section: 1.5rem;
+      --text-metric: 1.75rem;
+      --text-display: 3.75rem;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 48px;
+      --page-gutter: var(--space-5);
+      --radius: 6px;
+      --shadow-surface: 0 4px 16px rgba(0, 0, 0, 0.12);
+      --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.20);
     }}
 
     * {{
@@ -718,33 +740,63 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     body {{
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background:
-        linear-gradient(140deg, rgba(245,200,76,0.10), transparent 30%),
-        linear-gradient(220deg, rgba(77,225,255,0.10), transparent 34%),
-        var(--bg);
+      font-family: var(--font-body);
+      font-size: var(--text-body);
+      line-height: 1.5;
+      letter-spacing: 0;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
     }}
 
-    body::before {{
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 72px 72px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 72%);
-      pointer-events: none;
-      z-index: -1;
+    button,
+    input,
+    select,
+    textarea {{
+      font: inherit;
+      color: inherit;
+    }}
+
+    a,
+    button,
+    summary {{
+      touch-action: manipulation;
+    }}
+
+    :focus-visible {{
+      outline: 2px solid var(--cyan);
+      outline-offset: 3px;
+    }}
+
+    .sr-only {{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }}
+
+    [data-manager="zee"] {{
+      --manager-color: var(--manager-zee);
+    }}
+
+    [data-manager="sam"] {{
+      --manager-color: var(--manager-sam);
+    }}
+
+    [data-manager="joey"] {{
+      --manager-color: var(--manager-joey);
     }}
 
     .page-shell {{
-      width: min(1240px, calc(100% - 32px));
+      width: min(1240px, calc(100% - 2 * var(--page-gutter)));
       margin: 0 auto;
-      padding: 28px 0 52px;
+      padding: var(--space-5) 0 var(--space-7);
     }}
 
     .hero {{
@@ -760,34 +812,29 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .metric-card,
     .card {{
       border: 1px solid var(--line);
-      background: linear-gradient(145deg, rgba(20,27,45,0.88), rgba(9,12,22,0.92));
-      box-shadow: 0 24px 80px rgba(0,0,0,0.30);
-      backdrop-filter: blur(14px);
+      background: var(--panel);
+      box-shadow: var(--shadow-surface);
     }}
 
-    .metric-card,
-    .insight-item,
-    .card {{
+    .interactive-surface {{
       transition:
         transform 180ms ease,
         border-color 180ms ease,
-        box-shadow 180ms ease,
-        background 180ms ease;
+        box-shadow 180ms ease;
     }}
 
-    .metric-card:hover,
-    .insight-item:hover,
-    .card:hover {{
-      transform: translateY(-3px) scale(1.01);
-      border-color: rgba(245,200,76,0.42);
-      box-shadow: 0 28px 90px rgba(0,0,0,0.38);
-      background: linear-gradient(145deg, rgba(25,33,55,0.92), rgba(10,14,25,0.96));
+    @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {{
+      .interactive-surface:hover {{
+        transform: translateY(-2px);
+        border-color: var(--cyan);
+        box-shadow: var(--shadow-hover);
+      }}
     }}
 
     .hero-copy {{
       position: relative;
       overflow: visible;
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: clamp(28px, 5vw, 54px);
       display: flex;
       flex-direction: column;
@@ -800,7 +847,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       position: absolute;
       inset: auto 0 0;
       height: 5px;
-      background: linear-gradient(90deg, var(--gold), var(--cyan), var(--rose));
+      background: var(--gold);
     }}
 
     .eyebrow,
@@ -808,19 +855,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .metric-label,
     .status-pill {{
       color: var(--cyan);
-      font-size: 0.72rem;
+      font-size: var(--text-xs);
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }}
 
     h1 {{
       max-width: 820px;
       margin: 18px 0 18px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(3rem, 8vw, 6.6rem);
-      line-height: 0.92;
-      font-weight: 900;
+      font-family: var(--font-body);
+      font-size: var(--text-display);
+      line-height: 1.05;
+      font-weight: 800;
       letter-spacing: 0;
       text-transform: uppercase;
     }}
@@ -828,7 +875,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .hero-copy p {{
       max-width: 680px;
       color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.18rem);
+      font-size: var(--text-body);
       line-height: 1.65;
     }}
 
@@ -843,6 +890,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 34px;
+    }}
+
+    /* Keep history anchors together so popovers stay within the shell. */
+    .hero-meta::after {{
+      content: '';
+      flex-basis: 100%;
+    }}
+
+    .hero-meta .trophy-cabinet,
+    .hero-meta .rivalry-archive {{
+      order: 1;
     }}
 
     .status-pill {{
@@ -880,7 +938,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       cursor: pointer;
       font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0;
       list-style: none;
       text-transform: uppercase;
     }}
@@ -928,7 +986,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: var(--cyan);
       font-size: 0.68rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }}
 
@@ -962,7 +1020,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .rivalry-archive th {{
       color: var(--gold);
       background: transparent;
-      letter-spacing: 0.08em;
+      letter-spacing: 0;
     }}
 
     .rivalry-archive td strong {{
@@ -1012,15 +1070,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .gw-card strong {{
-      font-family: 'Orbitron', sans-serif;
+      font-family: var(--font-body);
       color: var(--gold);
-      font-size: clamp(2.1rem, 4vw, 3.1rem);
+      font-size: 2rem;
     }}
 
     .metric-card strong {{
       display: block;
       margin: 12px 0 6px;
-      font-size: clamp(1.25rem, 2vw, 1.8rem);
+      font-size: var(--text-metric);
       line-height: 1.15;
     }}
 
@@ -1082,8 +1140,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .section-heading h2 {{
-      font-size: clamp(1.35rem, 3vw, 2.15rem);
-      line-height: 1.1;
+      font-size: var(--text-section);
+      line-height: 1.25;
       margin-top: 0;
     }}
 
@@ -1107,7 +1165,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-align: left;
       color: var(--gold);
       font-size: 0.72rem;
-      letter-spacing: 0.12em;
+      letter-spacing: 0;
       text-transform: uppercase;
       background: rgba(255,255,255,0.04);
     }}
@@ -1213,7 +1271,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       margin-bottom: 10px;
       font-size: 0.92rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0;
     }}
 
     .insight-item p,
@@ -1250,7 +1308,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       margin: 18px 0 12px;
       color: var(--cyan);
       font-size: 0.78rem;
-      letter-spacing: 0.12em;
+      letter-spacing: 0;
       text-transform: uppercase;
     }}
 
@@ -1301,10 +1359,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }}
     }}
 
+    @media (prefers-reduced-motion: reduce) {{
+      *,
+      *::before,
+      *::after {{
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }}
+    }}
+
     @media (max-width: 768px) {{
+      :root {{
+        --page-gutter: var(--space-4);
+        --text-display: 2.25rem;
+        --text-section: 1.25rem;
+        --text-metric: 1.5rem;
+      }}
+
       .page-shell {{
-        width: min(100% - 20px, 1240px);
-        padding-top: 10px;
+        padding-top: var(--space-3);
       }}
 
       .hero {{
@@ -1323,6 +1398,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       .hero-meta {{
         margin-top: 22px;
+      }}
+
+      .hero-meta::after {{
+        display: none;
       }}
 
       .status-pill {{
@@ -1377,7 +1456,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         margin: 0;
         color: var(--gold);
         font-size: 0.82rem;
-        letter-spacing: 0.08em;
+        letter-spacing: 0;
       }}
 
       .archive-season-card div {{
@@ -1481,7 +1560,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         color: var(--cyan);
         font-size: 0.64rem;
         font-weight: 800;
-        letter-spacing: 0.10em;
+        letter-spacing: 0;
         text-transform: uppercase;
       }}
 
