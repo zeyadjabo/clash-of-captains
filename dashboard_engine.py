@@ -21,6 +21,35 @@ PAST_CHAMPIONS = [
     {"season": "2023/2024", "manager": "Sam", "points": 2350}
 ]
 
+# Lucide icon paths (ISC); attribution is in assets/lucide-LICENSE.txt.
+UI_ICON_PATHS = {
+    "trophy": (
+        '<path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/>'
+        '<path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/>'
+        '<path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/>'
+        '<path d="M4 22h16"/>'
+        '<path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/>'
+        '<path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/>'
+    ),
+    "history": (
+        '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>'
+        '<path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>'
+    ),
+    "movement": (
+        '<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/>'
+        '<path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>'
+    ),
+}
+
+
+def ui_icon(name):
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" '
+        'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+        + UI_ICON_PATHS[name] + '</svg>'
+    )
+
 
 # ====================== DATA FETCHING ======================
 def get_bootstrap_data():
@@ -285,6 +314,15 @@ def format_rank(value):
 
 def build_trophy_cabinet_html():
     rows = []
+    latest_champion = max(PAST_CHAMPIONS, key=lambda champion: champion["season"], default=None)
+    champion_note = (
+        f'<small class="champion-note">Champion: {escape(latest_champion["manager"])}</small>'
+        if latest_champion else ""
+    )
+    champion_label = (
+        f"Trophy Cabinet. Reigning champion: {latest_champion['manager']}, {latest_champion['season']}."
+        if latest_champion else "Trophy Cabinet"
+    )
 
     for champion in PAST_CHAMPIONS:
         points = champion.get("points")
@@ -297,9 +335,12 @@ def build_trophy_cabinet_html():
         )
 
     return f"""
-          <details class="trophy-cabinet">
-            <summary>Trophy Cabinet</summary>
-            <div class="trophy-cabinet-panel">
+          <details class="trophy-cabinet" name="rivalry-history">
+            <summary data-history-view="trophies" aria-controls="trophy-cabinet-panel" aria-label="{escape(champion_label)}">
+              {ui_icon('trophy')}
+              <span class="history-trigger-text"><span>Trophy Cabinet</span>{champion_note}</span>
+            </summary>
+            <div class="trophy-cabinet-panel" id="trophy-cabinet-panel">
               <span>Historical champions</span>
               <table>
                 <thead>
@@ -381,9 +422,11 @@ def build_rivalry_archive_html(managers):
         )
 
     return f"""
-          <details class="rivalry-archive">
-            <summary>Rivalry Archive</summary>
-            <div class="rivalry-archive-panel">
+          <details class="rivalry-archive" name="rivalry-history">
+            <summary data-history-view="archive" aria-controls="rivalry-archive-panel">
+              {ui_icon('history')}<span class="history-trigger-text">Rivalry Archive</span>
+            </summary>
+            <div class="rivalry-archive-panel" id="rivalry-archive-panel">
               <span>Historical overall ranks, points, and percentile</span>
               <table>
                 <thead>
@@ -799,15 +842,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       padding: var(--space-5) 0 var(--space-7);
     }}
 
-    .hero {{
+    .masthead {{
       position: relative;
       z-index: 20;
-      min-height: 430px;
-      display: block;
-      padding: 36px 0 20px;
+      display: grid;
+      gap: var(--space-3);
+      padding: var(--space-2) 0 var(--space-5);
+      border-bottom: 1px solid var(--line);
     }}
 
-    .hero-copy,
     .section-panel,
     .metric-card,
     .card {{
@@ -831,29 +874,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }}
     }}
 
-    .hero-copy {{
-      position: relative;
-      overflow: visible;
-      border-radius: var(--radius);
-      padding: clamp(28px, 5vw, 54px);
+    .masthead-top {{
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: space-between;
-      min-height: 390px;
+      gap: var(--space-3);
     }}
 
-    .hero-copy::after {{
-      content: '';
-      position: absolute;
-      inset: auto 0 0;
-      height: 5px;
-      background: var(--gold);
+    .masthead-brand {{
+      min-width: 0;
     }}
 
     .eyebrow,
     .section-heading span,
-    .metric-label,
-    .status-pill {{
+    .metric-label {{
       color: var(--cyan);
       font-size: var(--text-xs);
       font-weight: 800;
@@ -861,22 +895,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       text-transform: uppercase;
     }}
 
-    h1 {{
-      max-width: 820px;
-      margin: 18px 0 18px;
+    .masthead h1 {{
+      margin-top: var(--space-1);
       font-family: var(--font-body);
-      font-size: var(--text-display);
-      line-height: 1.05;
+      font-size: 2rem;
+      line-height: 1.15;
       font-weight: 800;
       letter-spacing: 0;
-      text-transform: uppercase;
     }}
 
-    .hero-copy p {{
-      max-width: 680px;
-      color: var(--muted);
-      font-size: var(--text-body);
-      line-height: 1.65;
+    .gameweek-label {{
+      flex: 0 0 auto;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: var(--text-sm);
+      font-weight: 800;
+      color: var(--gold);
+      background: var(--panel);
     }}
 
     .joey-dunk {{
@@ -885,62 +921,94 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       white-space: nowrap;
     }}
 
-    .hero-meta {{
+    .masthead-meta {{
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 34px;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-1) var(--space-4);
+      color: var(--muted);
+      font-size: var(--text-xs);
     }}
 
-    /* Keep history anchors together so popovers stay within the shell. */
-    .hero-meta::after {{
-      content: '';
-      flex-basis: 100%;
+    .snapshot-status {{
+      min-width: 0;
+      overflow-wrap: anywhere;
     }}
 
-    .hero-meta .trophy-cabinet,
-    .hero-meta .rivalry-archive {{
-      order: 1;
+    .masthead-nav {{
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: var(--space-2);
     }}
 
-    .status-pill {{
+    .masthead-link {{
       display: inline-flex;
       align-items: center;
-      min-height: 36px;
-      padding: 9px 12px;
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
+      gap: var(--space-2);
+      min-height: 44px;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: transparent;
       color: var(--text);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-decoration: none;
     }}
 
-    .status-pill.live {{
-      color: #071016;
-      background: var(--gold);
-      border-color: transparent;
+    .masthead-nav svg {{
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
     }}
 
+    /* Anchor native panels to the whole nav, not a narrow trigger. */
     .trophy-cabinet,
     .rivalry-archive {{
-      position: relative;
+      position: static;
     }}
 
     .trophy-cabinet summary,
     .rivalry-archive summary {{
       display: inline-flex;
       align-items: center;
-      min-height: 36px;
-      padding: 9px 12px;
-      border: 1px solid rgba(245,200,76,0.35);
-      border-radius: 999px;
-      background: rgba(245,200,76,0.10);
-      color: var(--gold);
+      gap: var(--space-2);
+      min-height: 44px;
+      padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text);
       cursor: pointer;
-      font-size: 0.72rem;
-      font-weight: 800;
+      font-size: var(--text-sm);
+      font-weight: 600;
       letter-spacing: 0;
       list-style: none;
-      text-transform: uppercase;
+    }}
+
+    .history-trigger-text {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0 var(--space-3);
+      min-width: 0;
+      text-align: left;
+    }}
+
+    .champion-note {{
+      color: var(--gold);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      overflow-wrap: anywhere;
+    }}
+
+    .masthead-link:hover,
+    .trophy-cabinet summary:hover,
+    .rivalry-archive summary:hover {{
+      background: var(--panel-strong);
     }}
 
     .trophy-cabinet summary::-webkit-details-marker,
@@ -951,7 +1019,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .trophy-cabinet summary::after,
     .rivalry-archive summary::after {{
       content: '▾';
-      margin-left: 8px;
+      margin-left: auto;
       font-size: 0.82rem;
     }}
 
@@ -965,9 +1033,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       position: absolute;
       left: 0;
       right: auto;
-      top: calc(100% + 10px);
+      top: calc(100% + var(--space-2));
       z-index: 30;
-      width: min(520px, calc(100vw - 32px));
+      width: min(520px, 100%);
       padding: 14px;
       border: 1px solid rgba(245,200,76,0.32);
       border-radius: 8px;
@@ -976,7 +1044,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .trophy-cabinet-panel {{
-      width: min(620px, calc(100vw - 32px));
+      width: min(620px, 100%);
     }}
 
     .trophy-cabinet-panel > span,
@@ -1294,6 +1362,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       margin-top: 26px;
     }}
 
+    .dashboard-footer {{
+      margin-top: var(--space-7);
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+    }}
+
+    .rivalry-description {{
+      max-width: 720px;
+      font-size: var(--text-sm);
+      line-height: 1.65;
+    }}
+
+    .refresh-information {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2) var(--space-5);
+      margin-top: var(--space-3);
+      list-style: none;
+      font-size: var(--text-xs);
+    }}
+
     .container {{
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }}
@@ -1382,32 +1472,40 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         padding-top: var(--space-3);
       }}
 
-      .hero {{
-        min-height: auto;
-        padding-top: 12px;
+      .masthead {{
+        padding-top: var(--space-1);
+        padding-bottom: var(--space-4);
       }}
 
-      .hero-copy,
       .section-panel {{
         padding: 18px;
       }}
 
-      .hero-copy {{
-        min-height: auto;
+      .masthead h1 {{
+        font-size: 1.5rem;
       }}
 
-      .hero-meta {{
-        margin-top: 22px;
+      .gameweek-label {{
+        padding: var(--space-1) var(--space-2);
       }}
 
-      .hero-meta::after {{
-        display: none;
+      .masthead-nav {{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }}
 
-      .status-pill {{
-        width: 100%;
-        justify-content: center;
-        text-align: center;
+      .masthead-link {{
+        min-height: 52px;
+        padding: var(--space-2);
+        font-size: var(--text-xs);
+      }}
+
+      .trophy-cabinet {{
+        grid-column: 1 / -1;
+      }}
+
+      .rivalry-archive summary {{
+        min-height: 52px;
       }}
 
       .trophy-cabinet,
@@ -1419,7 +1517,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       .trophy-cabinet summary,
       .rivalry-archive summary {{
-        justify-content: center;
+        gap: 6px;
+        padding: var(--space-2);
+        font-size: var(--text-xs);
       }}
 
       .trophy-cabinet-panel,
@@ -1600,26 +1700,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 <body>
   <main class="page-shell">
-    <section class="hero fade-in">
-      <div class="hero-copy">
-        <div>
-          <div class="eyebrow">Fantasy Premier League rivalry desk</div>
+    <header class="hero masthead fade-in" aria-label="League overview">
+      <div class="masthead-top">
+        <div class="masthead-brand">
+          <p class="eyebrow">Fantasy Premier League rivalry desk</p>
           <h1>Clash of Captains</h1>
-          <p>
-            A private war room for the title race • Live standings, pressure points, and weekly swings that decide bragging rights.
-          </p>
         </div>
-
-        <div class="hero-meta">
-          <span class="status-pill live">Gameweek {gw}</span>
-          <span class="status-pill">Last scanned: {timestamp}</span>
-          <span class="status-pill">Updates 9 AM & 9 PM Eastern</span>
-          <span class="status-pill">Manual refresh by WhatsApp request</span>
-          {trophy_html}
-          {archive_html}
-        </div>
+        <span class="gameweek-label" data-gameweek="{gw}">GW{gw}</span>
       </div>
-    </section>
+
+      <div class="masthead-meta">
+        <p class="snapshot-status">Last scanned: <time datetime="{timestamp_iso}">{timestamp}</time></p>
+        <span class="masthead-season" data-season="{season}">Season {season}</span>
+      </div>
+
+      <nav class="masthead-nav" aria-label="Rivalry navigation">
+        {trophy_html}
+        {archive_html}
+        <a class="masthead-link" href="#gameweek-movement">{movement_icon}<span>Gameweek movement</span></a>
+      </nav>
+    </header>
 
     {summary_html}
 
@@ -1654,15 +1754,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       {history_chart_html}
     </section>
 
-    <section class="transfers-section">
+    <section class="transfers-section" id="gameweek-movement" tabindex="-1" aria-labelledby="movement-heading">
       <div class="section-heading">
         <span>Transfer Wire</span>
-        <h2>Gameweek movement</h2>
+        <h2 id="movement-heading">Gameweek movement</h2>
       </div>
       <div class="container">
         {cards}
       </div>
     </section>
+
+    <footer class="dashboard-footer">
+      <p class="rivalry-description">A private war room for the title race • Live standings, pressure points, and weekly swings that decide bragging rights.</p>
+      <ul class="refresh-information">
+        <li>Updates 9 AM & 9 PM Eastern</li>
+        <li>Manual refresh by WhatsApp request</li>
+      </ul>
+    </footer>
   </main>
 
   <script>
@@ -1803,7 +1911,9 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
     standings = []
 
     est = ZoneInfo("America/New_York")
-    timestamp = datetime.now(est).strftime("%Y-%m-%d %I:%M %p %Z")
+    scan_time = datetime.now(est)
+    timestamp = scan_time.strftime("%Y-%m-%d %I:%M %p %Z")
+    timestamp_iso = scan_time.isoformat(timespec="minutes")
 
     for info in managers:
         entry_id = info["id"]
@@ -1927,11 +2037,14 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
         </article>"""
 
     summary_html = build_summary_html(standings, gw, gw_average)
-    trophy_html = build_trophy_cabinet_html()
-    archive_html = build_rivalry_archive_html(managers)
+    trophy_html = build_trophy_cabinet_html().strip()
+    archive_html = build_rivalry_archive_html(managers).strip()
     full_html = HTML_TEMPLATE.format(
         gw=gw,
         timestamp=timestamp,
+        timestamp_iso=timestamp_iso,
+        season=escape(ACTIVE_SEASON),
+        movement_icon=ui_icon("movement"),
         trophy_html=trophy_html,
         archive_html=archive_html,
         summary_html=summary_html,
