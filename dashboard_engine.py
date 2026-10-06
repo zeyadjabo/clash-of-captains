@@ -341,7 +341,7 @@ def build_trophy_cabinet_html():
         if latest_champion else ""
     )
     champion_label = (
-        f"Trophy Cabinet. Reigning champion: {latest_champion['manager']}, {latest_champion['season']}."
+        f"Trophy Cabinet Champion: {latest_champion['manager']}. Season {latest_champion['season']}."
         if latest_champion else "Trophy Cabinet"
     )
 
@@ -367,7 +367,7 @@ def build_trophy_cabinet_html():
           <details class="trophy-cabinet" name="rivalry-history">
             <summary data-history-view="trophies" aria-controls="trophy-cabinet-panel" aria-label="{escape(champion_label)}">
               {ui_icon('trophy')}
-              <span class="history-trigger-text"><span>Trophy Cabinet</span>{champion_note}</span>
+              <span class="history-trigger-text"><span>Trophy Cabinet</span> {champion_note}</span>
             </summary>
             <div class="trophy-cabinet-panel history-panel" id="trophy-cabinet-panel">
               <span>Historical champions</span>
@@ -763,6 +763,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
+  <noscript><style>.fade-in {{ animation: none; }}</style></noscript>
 
   <style>
     :root {{
@@ -815,6 +816,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
     }}
 
     button,
@@ -835,6 +838,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       outline: 2px solid var(--cyan);
       outline-offset: 3px;
     }}
+
+    .skip-link {{
+      position: fixed;
+      top: max(8px, env(safe-area-inset-top));
+      left: max(8px, env(safe-area-inset-left));
+      z-index: 100;
+      padding: 12px 16px;
+      min-height: 44px;
+      background: var(--panel-strong);
+      color: var(--text);
+      border: 2px solid var(--cyan);
+      border-radius: var(--radius);
+      transform: translateY(calc(-100% - 24px));
+    }}
+
+    .skip-link:focus {{ transform: none; }}
 
     .sr-only {{
       position: absolute;
@@ -925,6 +944,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       line-height: 1.15;
       font-weight: 800;
       letter-spacing: 0;
+      overflow-wrap: anywhere;
     }}
 
     .gameweek-label {{
@@ -959,6 +979,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       overflow-wrap: anywhere;
     }}
 
+    @media (max-width: 480px) {{
+      .masthead-meta {{ display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }}
+    }}
+
     .masthead-nav {{
       position: relative;
       display: flex;
@@ -980,7 +1004,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: var(--text-sm);
       font-weight: 600;
       text-decoration: none;
+      min-width: 0;
+      max-width: 100%;
     }}
+
+    .masthead-link span {{ min-width: 0; overflow-wrap: anywhere; }}
 
     .masthead-nav svg {{
       width: 16px;
@@ -1565,6 +1593,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         padding: 0;
         border: 0;
         font-size: var(--text-sm);
+        overflow-wrap: anywhere;
       }}
 
       .standing-position {{ grid-column: 1; grid-row: 1; }}
@@ -1657,6 +1686,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       min-width: 0;
       cursor: pointer;
     }}
+
+    .chart-legend-item:focus-within {{ outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: var(--radius); }}
 
     .chart-legend-item input {{
       width: 18px;
@@ -1869,7 +1900,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .movement-header {{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }}
-    .movement-header h2 {{ margin: 0; overflow-wrap: anywhere; }}
+    .movement-header h3 {{ margin: 0; overflow-wrap: anywhere; color: var(--text); font-size: 1.05rem; text-transform: none; }}
     .movement-team {{ color: var(--muted); font-size: var(--text-xs); overflow-wrap: anywhere; }}
     .movement-count {{ flex-shrink: 0; color: var(--muted); font-size: var(--text-xs); }}
     .transfer-pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
@@ -2095,6 +2126,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 
 <body>
+  <a class="skip-link" href="#current-standings">Skip to standings</a>
   <main class="page-shell">
     <header class="hero masthead fade-in" aria-label="League overview">
       <div class="masthead-top">
@@ -2117,10 +2149,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </nav>
     </header>
 
-    <section class="section-panel league-table" aria-labelledby="standings-heading">
+    <section class="section-panel league-table" id="current-standings" tabindex="-1" aria-labelledby="standings-heading">
       <div class="section-heading standings-heading">
         <h2 id="standings-heading">Current standings</h2>
-        <p id="score-scale">{score_scale}</p>
+        <p id="score-scale" class="sr-only">{score_scale}</p>
       </div>
       <table class="standings-table" role="table" aria-labelledby="standings-heading" aria-describedby="score-scale">
         <thead role="rowgroup">
@@ -2238,6 +2270,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       delete chart.dataset.rendered;
       chart.setAttribute("aria-busy", "false");
       document.querySelector(".chart-frame").hidden = true;
+      document.querySelector(".chart-data").hidden = false;
       document.getElementById("chart-status").textContent = "Rank chart unavailable.";
       document.querySelector(".chart-retry").hidden = false;
       document.querySelectorAll("[data-chart-trace]").forEach(function(input) {{ input.disabled = true; }});
@@ -2279,6 +2312,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (!chart || !historyFigure || chart.dataset.rendered || chart.dataset.state === "loading") return;
       chart.dataset.state = "loading";
       chart.setAttribute("aria-busy", "true");
+      document.querySelector(".chart-data").hidden = true;
       document.querySelector(".chart-frame").hidden = false;
       document.getElementById("chart-status").textContent = "Loading rank chart...";
       document.querySelector(".chart-retry").hidden = true;
@@ -2312,6 +2346,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       try {{
         historyFigure = JSON.parse(document.getElementById("history-chart-json").textContent);
       }} catch (error) {{ historyChartFailed(); return; }}
+      document.querySelector(".chart-data").hidden = true;
       var root = document.querySelector(".rank-history");
       var press;
       chart.addEventListener("pointerdown", function(event) {{
@@ -2511,7 +2546,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 # ====================== CARD TEMPLATE ======================
 CARD_TEMPLATE = """
 <article class="card movement-card interactive-surface" data-manager="{manager_key}" aria-labelledby="movement-{manager_key}">
-  <header class="movement-header"><div><h2 id="movement-{manager_key}">{manager}</h2><p class="movement-team">{team}</p></div><span class="movement-count">{transfer_count}</span></header>
+  <header class="movement-header"><div><h3 id="movement-{manager_key}">{manager}</h3><p class="movement-team">{team}</p></div><span class="movement-count">{transfer_count}</span></header>
   {transfers_html}
 </article>
 """
