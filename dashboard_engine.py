@@ -181,10 +181,9 @@ def get_transfers(entry_id, gw):
             data = requests.get(url, timeout=8).json()
 
             if isinstance(data, list):
-                if "transfers-latest" in url and data:
-                    return data
-
-                return [t for t in data if t.get("event") == gw]
+                current = [t for t in data if isinstance(t, dict) and t.get("event") == gw]
+                if current or "transfers-latest" not in url:
+                    return current
 
         except Exception:
             pass
@@ -1847,10 +1846,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .transfer-list li {{
-      background: rgba(0,0,0,0.22);
-      padding: 12px;
-      border-radius: 8px;
-      border-left: 3px solid var(--rose);
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
       line-height: 1.45;
     }}
 
@@ -1870,6 +1867,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: var(--green);
       font-weight: 800;
     }}
+
+    .movement-header {{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; }}
+    .movement-header h2 {{ margin: 0; overflow-wrap: anywhere; }}
+    .movement-team {{ color: var(--muted); font-size: var(--text-xs); overflow-wrap: anywhere; }}
+    .movement-count {{ flex-shrink: 0; color: var(--muted); font-size: var(--text-xs); }}
+    .transfer-pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
+    .transfer-pair > div {{ min-width: 0; overflow-wrap: anywhere; }}
+    .transfer-label {{ display: block; color: var(--muted); font-size: var(--text-xs); font-weight: 500; margin-bottom: 2px; }}
+    .movement-empty {{ color: var(--muted); font-size: var(--text-sm); padding: 12px 0; }}
+    .transfer-more > summary {{ cursor: pointer; min-height: 44px; padding: 12px 0; color: var(--cyan); font-size: var(--text-sm); }}
+    .transfer-more .show-less, .transfer-more[open] .show-all {{ display: none; }}
+    .transfer-more[open] .show-less {{ display: inline; }}
+    .transfers-section .container {{ align-items: start; grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+    @media (max-width: 900px) {{ .transfers-section .container {{ grid-template-columns: 1fr; }} }}
 
     .fade-in {{
       animation: riseIn 700ms ease both;
@@ -2499,15 +2510,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 # ====================== CARD TEMPLATE ======================
 CARD_TEMPLATE = """
-<div class="card">
-  <h2>
-    {team} <small style="color:#888;">({manager})</small>
-  </h2>
-
-  <h3>Transfers this GW</h3>
+<article class="card movement-card interactive-surface" data-manager="{manager_key}" aria-labelledby="movement-{manager_key}">
+  <header class="movement-header"><div><h2 id="movement-{manager_key}">{manager}</h2><p class="movement-team">{team}</p></div><span class="movement-count">{transfer_count}</span></header>
   {transfers_html}
-</div>
+</article>
 """
+
+
+def build_transfers_html(transfers, players, gw):
+    lines = []
+    for transfer in transfers:
+        if not isinstance(transfer, dict) or transfer.get("event") != gw:
+            continue
+        out_name = escape(str(players.get(transfer.get("element_out"), "Unknown")))
+        in_name = escape(str(players.get(transfer.get("element_in"), "Unknown")))
+        raw_time = transfer.get("time")
+        time_html = '<small>Time unavailable</small>'
+        if isinstance(raw_time, str):
+            try:
+                source_time = datetime.fromisoformat(raw_time.replace("Z", "+00:00"))
+                display_time = source_time.astimezone(ZoneInfo("America/New_York")) if source_time.tzinfo else source_time
+                label = display_time.strftime("%b %d, %I:%M %p")
+                if display_time.tzinfo:
+                    label += " " + display_time.strftime("%Z")
+                time_html = f'<small><time datetime="{escape(source_time.isoformat(), quote=True)}">{label}</time></small>'
+            except ValueError:
+                pass
+        lines.append(f'<li><div class="transfer-pair"><div><span class="transfer-label">Out</span><span class="transfer-out">{out_name}</span></div><div><span class="transfer-label">In</span><span class="transfer-in">{in_name}</span></div></div>{time_html}</li>')
+    if not lines:
+        return '<p class="movement-empty">No transfers this GW</p>', '0 transfers'
+    markup = '<ul class="transfer-list">' + ''.join(lines[:3]) + '</ul>'
+    if len(lines) > 3:
+        markup += f'<details class="transfer-more"><summary><span class="show-all">Show all {len(lines)} transfers</span><span class="show-less">Show less</span></summary><ul class="transfer-list">' + ''.join(lines[3:]) + '</ul></details>'
+    return markup, f'{len(lines)} transfer' + ('s' if len(lines) != 1 else '')
 
 
 # ====================== HTML GENERATION ======================
@@ -2566,33 +2601,13 @@ def generate_html(gw, gw_average, players, managers, history_chart_html):
 
         transfers = get_transfers(entry_id, gw)
 
-        trans_lines = []
-
-        for t in transfers:
-            in_id = t.get("element_in")
-            out_id = t.get("element_out")
-
-            in_name = players.get(in_id, "Unknown")
-            out_name = players.get(out_id, "Unknown")
-
-            raw_time = t.get("time", "")
-            clean_time = raw_time[:16].replace("T", " ") if raw_time else "N/A"
-
-            trans_lines.append(
-                f"<li><span class='transfer-out'>{out_name}</span> ↔ "
-                f"<span class='transfer-in'>{in_name}</span><br>"
-                f"<small>£0.0 → £0.0 • {clean_time}</small></li>"
-            )
-
-        transfers_html = (
-            '<ul class="transfer-list">' + "".join(trans_lines) + "</ul>"
-            if trans_lines
-            else '<p style="color:#888;">No transfers this GW</p>'
-        )
+        transfers_html, transfer_count = build_transfers_html(transfers, players, gw)
 
         cards.append(CARD_TEMPLATE.format(
             team=escape(info["team"]),
             manager=escape(info["name"]),
+            manager_key=escape(info["name"].lower(), quote=True),
+            transfer_count=transfer_count,
             transfers_html=transfers_html
         ))
 
