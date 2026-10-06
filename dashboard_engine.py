@@ -2126,7 +2126,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </head>
 
 <body>
-  <a class="skip-link" href="#current-standings">Skip to standings</a>
+  <a class="skip-link" href="#current-standings" tabindex="0">Skip to standings</a>
   <main class="page-shell">
     <header class="hero masthead fade-in" aria-label="League overview">
       <div class="masthead-top">
@@ -2145,7 +2145,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <nav class="masthead-nav" aria-label="Rivalry navigation">
         {trophy_html}
         {archive_html}
-        <a class="masthead-link" href="#gameweek-movement">{movement_icon}<span>Gameweek movement</span></a>
+        <a class="masthead-link" href="#gameweek-movement" tabindex="0">{movement_icon}<span>Gameweek movement</span></a>
       </nav>
     </header>
 
@@ -2221,6 +2221,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       var root = document.querySelector(".rank-history");
       var horizon = Math.min(Number(root.dataset.currentGw) + 5, 38);
       var width = frame.clientWidth;
+      var leftMargin = mobile ? 60 : 96;
+      var startPadding = (Math.max(horizon, 2) - 1) * 8 / Math.max(width - leftMargin - 24 - 8, 1);
       var budget = Math.max(2, Math.floor((width - 84) / 48));
       var step = [1, 2, 4, 6, 8, 12, 20].find(function(value) {{ return Math.ceil(horizon / value) <= budget; }}) || 20;
       var ticks = [1];
@@ -2233,13 +2235,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         autosize: true,
         width: width,
         height: frame.clientHeight,
-        margin: {{ l: mobile ? 60 : 96, r: 24, t: 16, b: 48 }},
+        margin: {{ l: leftMargin, r: 24, t: 16, b: 48 }},
         font: {{ family: style.fontFamily, size: mobile ? 11 : 12, color: style.getPropertyValue("--muted").trim() }},
         paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
         showlegend: false, dragmode: false, hovermode: "x unified",
         shapes: [historySelectionShape()],
         hoverlabel: {{ bgcolor: style.getPropertyValue("--panel-strong").trim(), font: {{ size: 12 }}, namelength: -1 }},
-        xaxis: {{ range: [1, Math.max(horizon, 2)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: {{ text: "GW%{{x}}" }}, title: {{ text: "Gameweek", font: {{ size: 12 }} }}, gridcolor: "rgba(255,255,255,0.08)", zeroline: false }},
+        xaxis: {{ range: [1 - startPadding, Math.max(horizon, 2)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: {{ text: "GW%{{x}}" }}, title: {{ text: "Gameweek", font: {{ size: 12 }} }}, gridcolor: "rgba(255,255,255,0.08)", zeroline: false }},
         yaxis: {{ autorange: "reversed", tickformat: mobile ? "~s" : ",", automargin: true, fixedrange: true, title: {{ text: "Overall rank", font: {{ size: 12 }}, standoff: 16 }}, gridcolor: "rgba(255,255,255,0.12)", zeroline: false }}
       }};
     }}
