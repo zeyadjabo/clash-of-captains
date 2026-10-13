@@ -209,7 +209,7 @@ def get_manager_past_seasons(entry_id):
 
 # ====================== HISTORY CHART ======================
 def build_history_chart_html(fig, current_gw):
-    horizon = min(current_gw + 5, 38)
+    horizon = min(current_gw + 3, 38)
     fig.update_layout(
         showlegend=False,
         yaxis=dict(autorange="reversed", tickformat=","),
@@ -2219,7 +2219,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       var mobile = window.matchMedia("(max-width: 768px)").matches;
       var frame = document.querySelector(".chart-frame");
       var root = document.querySelector(".rank-history");
-      var horizon = Math.min(Number(root.dataset.currentGw) + 5, 38);
+      var horizon = Math.min(Number(root.dataset.currentGw) + 3, 38);
       var width = frame.clientWidth;
       var leftMargin = mobile ? 60 : 96;
       var startPadding = (Math.max(horizon, 2) - 1) * 8 / Math.max(width - leftMargin - 24 - 8, 1);
