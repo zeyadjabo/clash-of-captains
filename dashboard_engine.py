@@ -248,11 +248,16 @@ def build_history_chart_html(fig, current_gw):
     data_rows = "".join(f'<li><h4>GW{gw}</h4><dl class="chart-ranks">{rank_readout(gw)}</dl></li>' for gw in rounds)
     return f"""
       <div class="rank-history" data-current-gw="{current_gw}" data-selected-gw="{latest}">
+        <div class="chart-controls" role="group" aria-label="Rank history range">
+          <div class="chart-range"><button type="button" data-history-range="recent" aria-pressed="false">Last 3 GWs</button><button type="button" data-history-range="season" aria-pressed="true">Full season</button></div>
+          <span class="chart-auto-scale">Auto scale</span>
+        </div>
         <div class="chart-toolbar">
           <fieldset class="chart-legend"><legend class="sr-only">Managers shown</legend>{''.join(legend_items)}</fieldset>
         </div>
         <div class="chart-state"><p id="chart-status" role="status">Interactive chart unavailable.</p><button class="chart-retry" type="button" hidden aria-label="Retry chart" title="Retry chart">{ui_icon('retry')}</button></div>
         <div class="chart-frame" hidden><div id="history-chart" class="plotly-graph-div" role="img" aria-label="Overall rank by gameweek, lower ranks are better" aria-describedby="chart-selected-heading"></div></div>
+        <p class="chart-scale-note" aria-live="polite"></p>
         <div class="chart-selection"><h3 id="chart-selected-heading">GW{latest} overall ranks</h3><dl class="chart-ranks chart-selected-ranks" aria-live="polite">{rank_readout(latest)}</dl></div>
         <details class="chart-data"><summary>Rank data</summary><ul class="rank-data-list" tabindex="0" aria-label="Recorded gameweek ranks">{data_rows}</ul></details>
       </div>
@@ -1661,6 +1666,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       box-shadow: none;
     }}
 
+    .chart-controls {{ display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 16px; }}
+    .chart-range {{ display: inline-flex; padding: 3px; border: 1px solid var(--muted); border-radius: 10px; }}
+    .chart-range button {{ min-height: 44px; padding: 8px 14px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-size: 13px; }}
+    .chart-range button[aria-pressed="true"] {{ background: var(--panel-strong); color: var(--text); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14); }}
+    .chart-range button:focus-visible {{ outline: 2px solid var(--cyan); outline-offset: 2px; }}
+    .chart-auto-scale, .chart-scale-note {{ color: var(--muted); font-size: 12px; }}
+    .chart-scale-note {{ margin: 12px 0; }}
+
     .chart-toolbar {{
       display: flex;
       align-items: flex-start;
@@ -2215,34 +2228,90 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     var historyFigure;
     var historyResizeTimer;
 
+    var historyRange = "season";
+
+    function compactRank(value) {{
+      if (value >= 1000000) return Number((value / 1000000).toFixed(2)) + "m";
+      if (value >= 1000) return Number((value / 1000).toFixed(1)) + "k";
+      return String(value);
+    }}
+
+    function historyChartWindow() {{
+      var weeks = historyFigure.data.flatMap(function(trace) {{ return trace.x; }});
+      var latest = weeks.length ? Math.max.apply(null, weeks) : 1;
+      return {{ start: historyRange === "recent" ? Math.max(1, latest - 2) : 1, end: latest }};
+    }}
+
+    function historyRankScale(worst, best) {{
+      best = Number.isFinite(best) ? Math.max(1, best) : 10000;
+      worst = Math.max(worst, best);
+      var low = Math.max(0, Math.log10(best) - 0.18);
+      var high = Math.max(low + 0.6, Math.log10(worst) + 0.1);
+      var ticks = [];
+      for (var power = Math.floor(low); power <= Math.ceil(high); power++) {{
+        [1, 2, 5].forEach(function(multiplier) {{
+          var value = multiplier * Math.pow(10, power);
+          if (Math.log10(value) >= low && Math.log10(value) <= high) ticks.push(value);
+        }});
+      }}
+      return {{ low: low, high: high, ticks: ticks }};
+    }}
+
     function getHistoryChartLayout() {{
       var mobile = window.matchMedia("(max-width: 768px)").matches;
       var frame = document.querySelector(".chart-frame");
-      var root = document.querySelector(".rank-history");
-      var horizon = Math.min(Number(root.dataset.currentGw) + 2, 38);
+      var view = historyChartWindow();
       var width = frame.clientWidth;
-      var leftMargin = mobile ? 60 : 96;
-      var startPadding = (Math.max(horizon, 2) - 1) * 8 / Math.max(width - leftMargin - 24 - 8, 1);
-      var budget = Math.max(2, Math.floor((width - 84) / 48));
-      var step = [1, 2, 4, 6, 8, 12, 20].find(function(value) {{ return Math.ceil(horizon / value) <= budget; }}) || 20;
-      var ticks = [1];
-      for (var gw = 1 + step; gw < horizon; gw += step) {{
-        if (horizon - gw >= step * 0.65) ticks.push(gw);
-      }}
-      ticks.push(horizon);
+      var leftMargin = mobile ? 58 : 78;
+      var rightMargin = mobile ? 64 : 84;
+      var span = Math.max(view.end - view.start, 1);
+      var padding = span * 10 / Math.max(width - leftMargin - rightMargin, 1);
+      var budget = Math.max(2, Math.floor((width - leftMargin - rightMargin) / 48));
+      var tickStep = Math.max(1, Math.ceil(span / budget));
+      var ticks = [];
+      for (var gw = view.start; gw <= view.end; gw += tickStep) ticks.push(gw);
+      if (ticks[ticks.length - 1] !== view.end) ticks.push(view.end);
+      var worst = 0;
+      var best = Infinity;
+      var endpoints = [];
+      historyFigure.data.forEach(function(trace, index) {{
+        var input = document.querySelector('[data-chart-trace="' + index + '"]');
+        if (!input.checked) return;
+        var last = -1;
+        trace.x.forEach(function(gw, point) {{
+          if (gw >= view.start && gw <= view.end && Number(trace.y[point]) > 0) {{
+            worst = Math.max(worst, Number(trace.y[point])); best = Math.min(best, Number(trace.y[point])); last = point;
+          }}
+        }});
+        if (last >= 0) {{
+          var color = getComputedStyle(input.closest("label")).getPropertyValue("--manager-color").trim();
+          endpoints.push({{ x: trace.x[last], y: trace.y[last], xref: "x", yref: "y", text: compactRank(trace.y[last]), showarrow: false, xanchor: "left", xshift: 10, bgcolor: color, borderpad: 4, font: {{ color: "#101315", size: mobile ? 10 : 12 }} }});
+        }}
+      }});
+      var scale = historyRankScale(worst, best);
+      // Separate close endpoint labels while keeping each label beside its actual point.
+      endpoints.sort(function(a, b) {{ return a.y - b.y; }});
+      var previous = -Infinity;
+      var plotHeight = Math.max(frame.clientHeight - 76, 1);
+      endpoints.forEach(function(label) {{
+        var position = (Math.log10(label.y) - scale.low) / (scale.high - scale.low) * plotHeight;
+        label.y = Math.log10(label.y);
+        var adjusted = Math.max(position, previous + 25);
+        label.yshift = position - adjusted;
+        previous = adjusted;
+      }});
+      document.querySelector(".chart-scale-note").textContent = "Log scale · More detail near the top ranks · Adjusts to visible ranks";
       var style = getComputedStyle(document.body);
       return {{
-        autosize: true,
-        width: width,
-        height: frame.clientHeight,
-        margin: {{ l: leftMargin, r: 24, t: 16, b: 48 }},
+        autosize: true, width: width, height: frame.clientHeight,
+        margin: {{ l: leftMargin, r: rightMargin, t: 28, b: 48 }},
         font: {{ family: style.fontFamily, size: mobile ? 11 : 12, color: style.getPropertyValue("--muted").trim() }},
         paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
         showlegend: false, dragmode: false, hovermode: "x unified",
-        shapes: [historySelectionShape()],
+        shapes: [historySelectionShape()], annotations: endpoints,
         hoverlabel: {{ bgcolor: style.getPropertyValue("--panel-strong").trim(), font: {{ size: 12 }}, namelength: -1 }},
-        xaxis: {{ range: [1 - startPadding, Math.max(horizon, 2)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: {{ text: "GW%{{x}}" }}, title: {{ text: "Gameweek", font: {{ size: 12 }} }}, gridcolor: "rgba(255,255,255,0.08)", zeroline: false }},
-        yaxis: {{ autorange: "reversed", tickformat: mobile ? "~s" : ",", automargin: true, fixedrange: true, title: {{ text: "Overall rank", font: {{ size: 12 }}, standoff: 16 }}, gridcolor: "rgba(255,255,255,0.12)", zeroline: false }}
+        xaxis: {{ range: [view.start - padding, view.end + (view.start === view.end ? 0.5 : padding)], tickmode: "array", tickvals: ticks, fixedrange: true, unifiedhovertitle: {{ text: "GW%{{x}}" }}, title: {{ text: "Gameweek", font: {{ size: 12 }} }}, gridcolor: "rgba(255,255,255,0.08)", zeroline: false }},
+        yaxis: {{ type: "log", autorange: false, range: [scale.high, scale.low], tickmode: "array", tickvals: scale.ticks, ticktext: scale.ticks.map(compactRank), automargin: true, fixedrange: true, title: {{ text: "Overall rank", font: {{ size: 12 }}, standoff: 12 }}, gridcolor: "rgba(255,255,255,0.12)", zeroline: false }}
       }};
     }}
 
@@ -2381,7 +2450,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           var manager = historyFigure.data[index].meta.manager;
           document.querySelector('.chart-selected-ranks [data-chart-manager="' + manager + '"]').hidden = !input.checked;
           document.getElementById("chart-status").textContent = document.querySelector("[data-chart-trace]:checked") ? "" : "No managers selected.";
-          Promise.resolve().then(function() {{ return Plotly.restyle(chart, {{ visible: input.checked }}, [index]); }}).catch(historyChartFailed);
+          Promise.resolve().then(function() {{ return Plotly.restyle(chart, {{ visible: input.checked }}, [index]).then(function() {{ return Plotly.relayout(chart, getHistoryChartLayout()); }}); }}).catch(historyChartFailed);
+        }});
+      }});
+      document.querySelectorAll("[data-history-range]").forEach(function(button) {{
+        button.addEventListener("click", function() {{
+          historyRange = button.dataset.historyRange;
+          document.querySelectorAll("[data-history-range]").forEach(function(item) {{ item.setAttribute("aria-pressed", String(item === button)); }});
+          var view = historyChartWindow();
+          var selected = Number(root.dataset.selectedGw);
+          if (selected < view.start || selected > view.end) selectHistoryRound(view.end);
+          tuneHistoryChart();
         }});
       }});
       document.querySelector(".chart-retry").addEventListener("click", renderHistoryChart);
